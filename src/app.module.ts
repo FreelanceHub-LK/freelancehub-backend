@@ -1,0 +1,24 @@
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { UsersModule } from './modules/users/users.module';
+import { FreelancersModule } from './modules/freelancers/freelancers.module';
+import { ClientsModule } from './modules/clients/clients.module';
+import { ProjectsModule } from './modules/projects/projects.module';
+import { ProposalsModule } from './modules/proposals/proposals.module';
+import { ContractsModule } from './modules/contracts/contracts.module';
+import { PaymentsModule } from './modules/payments/payments.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
+import { MessagesModule } from './modules/messages/messages.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { SkillsModule } from './modules/skills/skills.module';
+import { DisputesModule } from './modules/disputes/disputes.module';
+import { AuthModule } from './modules/auth/auth.module';
+
+@Module({
+  imports: [UsersModule, FreelancersModule, ClientsModule, ProjectsModule, ProposalsModule, ContractsModule, PaymentsModule, ReviewsModule, MessagesModule, NotificationsModule, CategoriesModule, SkillsModule, DisputesModule, AuthModule],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {}
