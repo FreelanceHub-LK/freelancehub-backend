@@ -15,9 +15,43 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { SkillsModule } from './modules/skills/skills.module';
 import { DisputesModule } from './modules/disputes/disputes.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import databaseConfig from './config/database.config';
 
 @Module({
-  imports: [UsersModule, FreelancersModule, ClientsModule, ProjectsModule, ProposalsModule, ContractsModule, PaymentsModule, ReviewsModule, MessagesModule, NotificationsModule, CategoriesModule, SkillsModule, DisputesModule, AuthModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [databaseConfig],
+      envFilePath: '.env',
+    }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('database.uri'),
+        user: configService.get<string>('database.user'),
+        pass: configService.get<string>('database.password'),
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      }),
+    }),
+    UsersModule,
+    FreelancersModule,
+    ClientsModule,
+    ProjectsModule,
+    ProposalsModule,
+    ContractsModule,
+    PaymentsModule,
+    ReviewsModule,
+    MessagesModule,
+    NotificationsModule,
+    CategoriesModule,
+    SkillsModule,
+    DisputesModule,
+    AuthModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

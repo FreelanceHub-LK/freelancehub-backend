@@ -4,6 +4,6 @@ import { DisputesService } from './disputes.service';
 
 @Module({
   controllers: [DisputesController],
-  providers: [DisputesService]
+  providers: [DisputesService],
 })
 export class DisputesModule {}
