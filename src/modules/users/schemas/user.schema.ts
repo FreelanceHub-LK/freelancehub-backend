@@ -60,7 +60,7 @@ export class User extends Document {
   @Prop({ default: false })
   bio: string;
 
-  @Prop({ default: false })
+  @Prop({ type: Date, default: null })
   lastLogin: Date;
 }
 
