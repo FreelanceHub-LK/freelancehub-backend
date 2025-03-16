@@ -17,6 +17,7 @@ import { DisputesModule } from './modules/disputes/disputes.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { EmailModule } from './modules/email/email.module';
 import databaseConfig from './config/database.config';
 
 @Module({
@@ -51,6 +52,7 @@ import databaseConfig from './config/database.config';
     SkillsModule,
     DisputesModule,
     AuthModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

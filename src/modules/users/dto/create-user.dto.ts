@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsString,
   MinLength,
+  IsBoolean,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from '../schemas/user.schema';
@@ -61,4 +62,13 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   bio?: string;
+
+  @ApiProperty({ 
+    description: 'Email verification status', 
+    required: false,
+    default: false
+  })
+  @IsOptional()
+  @IsBoolean()
+  emailVerified?: boolean;
 }
