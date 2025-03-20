@@ -1,5 +1,9 @@
 // src/modules/auth/auth.service.ts
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
@@ -42,7 +46,7 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    
+
     return this.generateAuthResponse(user);
   }
 
@@ -53,7 +57,7 @@ export class AuthService {
     }
 
     const newUser = await this.usersService.create(registerDto);
-    
+
     return this.generateAuthResponse(newUser);
   }
 
@@ -63,7 +67,7 @@ export class AuthService {
     }
 
     let user = await this.usersService.findByEmail(req.user.email);
-    
+
     if (!user) {
       user = await this.usersService.create({
         email: req.user.email,
@@ -79,7 +83,7 @@ export class AuthService {
         emailVerified: true,
       });
     }
-    
+
     return this.generateAuthResponse(user);
   }
 
@@ -88,18 +92,22 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Invalid token');
     }
-    
+
     return this.generateAuthResponse(user);
   }
 
   private generateAuthResponse(user: User | any): AuthResponseDto {
-    const payload = { email: user.email, sub: user._id || user.id, role: user.role };
-    
+    const payload = {
+      email: user.email,
+      sub: user._id || user.id,
+      role: user.role,
+    };
+
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get('auth.jwtSecret'),
       expiresIn: this.configService.get('auth.jwtExpiration') + 's',
     });
-    
+
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get('auth.jwtSecret'),
       expiresIn: '7d',
@@ -123,14 +131,14 @@ export class AuthService {
 
   async sendOtp(sendOtpDto: SendOtpDto): Promise<{ message: string }> {
     const { email } = sendOtpDto;
-    
+
     // Generate OTP
     const otp = await this.generateOtp();
-    
+
     // Set expiry (10 minutes from now)
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 10);
-    
+
     // Save OTP to database
     await this.otpModel.create({
       email,
@@ -138,39 +146,40 @@ export class AuthService {
       expiresAt,
       isUsed: false,
     });
-    
+
     // Send OTP via email
     await this.emailService.sendOtpEmail(email, otp);
-    
+
     return { message: 'OTP sent successfully' };
   }
 
   async verifyOtp(verifyOtpDto: VerifyOtpDto): Promise<{ message: string }> {
     const { email, otp } = verifyOtpDto;
-    
+
     // Find the most recent valid OTP for this email
-    const otpRecord = await this.otpModel.findOne({
-      email,
-      otp,
-      expiresAt: { $gt: new Date() },
-      isUsed: false,
-    }).sort({ createdAt: -1 });
-    
+    const otpRecord = await this.otpModel
+      .findOne({
+        email,
+        otp,
+        expiresAt: { $gt: new Date() },
+        isUsed: false,
+      })
+      .sort({ createdAt: -1 });
+
     if (!otpRecord) {
       throw new UnauthorizedException('Invalid or expired OTP');
     }
-    
+
     // Mark OTP as used
     otpRecord.isUsed = true;
     await otpRecord.save();
-    
+
     // Update user's email verification status
     const user = await this.usersService.findByEmail(email);
     if (user) {
       await this.usersService.update(user.id, { emailVerified: true });
     }
-    
+
     return { message: 'Email verified successfully' };
   }
-
 }

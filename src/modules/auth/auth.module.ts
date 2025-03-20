@@ -12,7 +12,6 @@ import { UsersModule } from '../users/users.module';
 import { Otp, OtpSchema } from './schemas/otp.schema';
 import authConfig from 'src/config/auth.config';
 
-
 @Module({
   imports: [
     ConfigModule,
@@ -20,21 +19,21 @@ import authConfig from 'src/config/auth.config';
     EmailModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     ConfigModule.forRoot({
-          isGlobal: true,
-          load: [authConfig],
-          envFilePath: '.env',
-        }),
+      isGlobal: true,
+      load: [authConfig],
+      envFilePath: '.env',
+    }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get('auth.jwtSecret'),
-        signOptions: { 
+        signOptions: {
           expiresIn: `${configService.get('auth.jwtExpiration')}s`,
         },
       }),
     }),
-    MongooseModule.forFeature([{ name: Otp.name, schema: OtpSchema }])
+    MongooseModule.forFeature([{ name: Otp.name, schema: OtpSchema }]),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, GoogleStrategy],

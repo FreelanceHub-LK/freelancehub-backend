@@ -21,7 +21,7 @@ export class EmailService {
 
   async sendOtpEmail(to: string, otp: string): Promise<void> {
     const appName = this.configService.get('APP_NAME') || 'Freelancer Platform';
-    
+
     await this.transporter.sendMail({
       from: `"${appName}" <${this.configService.get('EMAIL_FROM') || 'noreply@example.com'}>`,
       to,

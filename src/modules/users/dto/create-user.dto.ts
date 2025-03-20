@@ -63,10 +63,10 @@ export class CreateUserDto {
   @IsString()
   bio?: string;
 
-  @ApiProperty({ 
-    description: 'Email verification status', 
+  @ApiProperty({
+    description: 'Email verification status',
     required: false,
-    default: false
+    default: false,
   })
   @IsOptional()
   @IsBoolean()
