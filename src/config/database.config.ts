@@ -3,11 +3,12 @@ import { Otp } from 'src/modules/auth/schemas/otp.schema';
 import { Client } from 'src/modules/clients/client.schema';
 import { Freelancer } from 'src/modules/freelancers/schemas/freelancer.schema';
 import { User } from 'src/modules/users/schemas/user.schema';
+import { Payment } from 'src/modules/payments/schemas/payment.schema';
 
 export default registerAs('database', () => ({
   uri: process.env.MONGODB_URI,
   user: process.env.MONGODB_USER,
   password: process.env.MONGODB_PASSWORD,
-  entities: [User, Otp, Freelancer, Client],
+  entities: [User, Otp, Freelancer, Client, Payment],
   synchronize: true,
 }));
