@@ -96,7 +96,7 @@ export class AuthService {
     return this.generateAuthResponse(user);
   }
 
-  private generateAuthResponse(user: User | any): AuthResponseDto {
+  public generateAuthResponse(user: User | any): AuthResponseDto {
     const payload = {
       email: user.email,
       sub: user._id || user.id,
@@ -121,6 +121,8 @@ export class AuthService {
       profilePicture: user.profilePicture,
       accessToken,
       refreshToken,
+      passkeyEnabled: user.passkeyEnabled || false,
+      passkeyCount: user.passkeyCount || 0,
     });
   }
 

@@ -123,4 +123,11 @@ export class UsersService {
       totalPages: Math.ceil(total / limit),
     };
   }
+
+  async updatePasskeyStatus(userId: string, passkeyCount: number): Promise<void> {
+    await this.userModel.findByIdAndUpdate(userId, {
+      passkeyEnabled: passkeyCount > 0,
+      passkeyCount,
+    });
+  }
 }

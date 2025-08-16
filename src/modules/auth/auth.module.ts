@@ -10,6 +10,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { EmailModule } from '../email/email.module';
 import { UsersModule } from '../users/users.module';
 import { Otp, OtpSchema } from './schemas/otp.schema';
+import { Passkey, PasskeySchema } from './schemas/passkey.schema';
+import { PasskeyService } from './services/passkey.service';
+import { PasskeyController } from './controllers/passkey.controller';
 import authConfig from 'src/config/auth.config';
 
 @Module({
@@ -33,10 +36,13 @@ import authConfig from 'src/config/auth.config';
         },
       }),
     }),
-    MongooseModule.forFeature([{ name: Otp.name, schema: OtpSchema }]),
+    MongooseModule.forFeature([
+      { name: Otp.name, schema: OtpSchema },
+      { name: Passkey.name, schema: PasskeySchema },
+    ]),
   ],
-  controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, GoogleStrategy],
+  controllers: [AuthController, PasskeyController],
+  providers: [AuthService, PasskeyService, JwtStrategy, GoogleStrategy],
 
   exports: [AuthService],
 })

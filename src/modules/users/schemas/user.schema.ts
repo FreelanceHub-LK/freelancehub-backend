@@ -62,6 +62,12 @@ export class User extends Document {
 
   @Prop({ type: Date, default: null })
   lastLogin: Date;
+
+  @Prop({ default: false })
+  passkeyEnabled: boolean;
+
+  @Prop({ default: 0 })
+  passkeyCount: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -23,6 +23,12 @@ export class AuthResponseDto {
   @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' })
   refreshToken?: string;
 
+  @ApiProperty({ example: false })
+  passkeyEnabled?: boolean;
+
+  @ApiProperty({ example: 0 })
+  passkeyCount?: number;
+
   constructor(partial: Partial<AuthResponseDto>) {
     Object.assign(this, partial);
   }
