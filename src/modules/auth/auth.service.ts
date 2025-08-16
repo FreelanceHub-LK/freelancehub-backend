@@ -1,4 +1,3 @@
-// src/modules/auth/auth.service.ts
 import {
   Injectable,
   UnauthorizedException,
@@ -67,6 +66,7 @@ export class AuthService {
     }
 
     let user = await this.usersService.findByEmail(req.user.email);
+    console.log('User from Google:', user);
 
     if (!user) {
       user = await this.usersService.create({
@@ -125,21 +125,17 @@ export class AuthService {
   }
 
   async generateOtp(): Promise<string> {
-    // Generate a 6-digit OTP
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
   async sendOtp(sendOtpDto: SendOtpDto): Promise<{ message: string }> {
     const { email } = sendOtpDto;
 
-    // Generate OTP
     const otp = await this.generateOtp();
 
-    // Set expiry (10 minutes from now)
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 10);
 
-    // Save OTP to database
     await this.otpModel.create({
       email,
       otp,
@@ -147,7 +143,7 @@ export class AuthService {
       isUsed: false,
     });
 
-    // Send OTP via email
+
     await this.emailService.sendOtpEmail(email, otp);
 
     return { message: 'OTP sent successfully' };
@@ -156,7 +152,6 @@ export class AuthService {
   async verifyOtp(verifyOtpDto: VerifyOtpDto): Promise<{ message: string }> {
     const { email, otp } = verifyOtpDto;
 
-    // Find the most recent valid OTP for this email
     const otpRecord = await this.otpModel
       .findOne({
         email,
@@ -170,11 +165,8 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired OTP');
     }
 
-    // Mark OTP as used
     otpRecord.isUsed = true;
     await otpRecord.save();
-
-    // Update user's email verification status
     const user = await this.usersService.findByEmail(email);
     if (user) {
       await this.usersService.update(user.id, { emailVerified: true });
