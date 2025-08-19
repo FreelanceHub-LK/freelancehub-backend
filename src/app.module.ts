@@ -15,16 +15,18 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { SkillsModule } from './modules/skills/skills.module';
 import { DisputesModule } from './modules/disputes/disputes.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { FileUploadModule } from './modules/file-upload/file-upload.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { EmailModule } from './modules/email/email.module';
 import databaseConfig from './config/database.config';
+import fileUploadConfig from './config/file-upload.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig],
+      load: [databaseConfig, fileUploadConfig],
       envFilePath: '.env',
     }),
     MongooseModule.forRootAsync({
@@ -53,6 +55,7 @@ import databaseConfig from './config/database.config';
     DisputesModule,
     AuthModule,
     EmailModule,
+    FileUploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],
