@@ -13,6 +13,8 @@ export enum UserStatus {
   SUSPENDED = 'suspended',
 }
 
+export type UserDocument = User & Document;
+
 @Schema({ timestamps: true })
 export class User extends Document {
   @Prop({ required: true })

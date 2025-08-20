@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 
+export type FreelancerDocument = Freelancer & Document;
+
 @Schema({ timestamps: true })
 export class Freelancer extends Document {
   @Prop({
