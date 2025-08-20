@@ -87,6 +87,33 @@ export class AuthService {
     return this.generateAuthResponse(user);
   }
 
+  async googleLoginDirect(googleUser: any) {
+    if (!googleUser || !googleUser.email) {
+      throw new UnauthorizedException('Invalid Google user data');
+    }
+
+    let user = await this.usersService.findByEmail(googleUser.email);
+    console.log('User from Google (direct):', user);
+
+    if (!user) {
+      user = await this.usersService.create({
+        email: googleUser.email,
+        firstName: googleUser.firstName,
+        lastName: googleUser.lastName,
+        googleId: googleUser.googleId,
+        profilePicture: googleUser.profilePicture,
+        emailVerified: true,
+      });
+    } else if (!user.googleId) {
+      user = await this.usersService.update(user.id, {
+        googleId: googleUser.googleId,
+        emailVerified: true,
+      });
+    }
+
+    return this.generateAuthResponse(user);
+  }
+
   async refreshToken(userId: string): Promise<AuthResponseDto> {
     const user = await this.usersService.findOne(userId);
     if (!user) {

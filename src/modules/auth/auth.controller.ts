@@ -101,6 +101,17 @@ export class AuthController {
     // The guard will handle the redirection
   }
 
+  @Post('google/login')
+  @ApiOperation({ summary: 'Handle Google login from NextAuth' })
+  @ApiResponse({
+    status: 200,
+    description: 'Google login successful',
+    type: AuthResponseDto,
+  })
+  async googleLogin(@Body() googleUser: any): Promise<AuthResponseDto> {
+    return this.authService.googleLoginDirect(googleUser);
+  }
+
   @Get('google/callback')
   @ApiOperation({ summary: 'Google OAuth callback endpoint' })
   @ApiResponse({
