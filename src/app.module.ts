@@ -19,6 +19,7 @@ import { FileUploadModule } from './modules/file-upload/file-upload.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { EmailModule } from './modules/email/email.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 import databaseConfig from './config/database.config';
 import fileUploadConfig from './config/file-upload.config';
 
@@ -56,6 +57,7 @@ import fileUploadConfig from './config/file-upload.config';
     AuthModule,
     EmailModule,
     FileUploadModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

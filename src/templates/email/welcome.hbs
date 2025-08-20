@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to FreelanceHub</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; }
+        .header { text-align: center; padding: 20px 0; border-bottom: 1px solid #eee; }
+        .content { padding: 20px 0; }
+        .btn { display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+        .footer { text-align: center; padding: 20px 0; border-top: 1px solid #eee; color: #666; font-size: 14px; }
+        .feature-list { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .feature-item { margin: 10px 0; padding-left: 20px; position: relative; }
+        .feature-item:before { content: "✓"; position: absolute; left: 0; color: #28a745; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Welcome to FreelanceHub!</h1>
+        </div>
+        
+        <div class="content">
+            <h2>Hello {{userName}}!</h2>
+            
+            <p>Welcome to FreelanceHub, the premier platform for connecting talented freelancers with amazing clients. We're excited to have you join our community as a <strong>{{userType}}</strong>!</p>
+            
+            <div class="feature-list">
+                <h3>What you can do on FreelanceHub:</h3>
+                {{#if (eq userType "freelancer")}}
+                <div class="feature-item">Browse and bid on exciting projects</div>
+                <div class="feature-item">Showcase your skills and portfolio</div>
+                <div class="feature-item">Build long-term client relationships</div>
+                <div class="feature-item">Secure payments with escrow protection</div>
+                <div class="feature-item">Grow your freelance business</div>
+                {{else}}
+                <div class="feature-item">Post projects and find top talent</div>
+                <div class="feature-item">Review freelancer profiles and portfolios</div>
+                <div class="feature-item">Manage projects with built-in tools</div>
+                <div class="feature-item">Secure payments and milestone tracking</div>
+                <div class="feature-item">Scale your business with reliable freelancers</div>
+                {{/if}}
+            </div>
+            
+            <p>Ready to get started? Click the button below to access your dashboard:</p>
+            
+            <div style="text-align: center;">
+                <a href="{{loginUrl}}" class="btn">Go to Dashboard</a>
+            </div>
+            
+            <p>If you have any questions or need assistance, our support team is here to help. Simply reply to this email or contact us at <a href="mailto:{{supportEmail}}">{{supportEmail}}</a>.</p>
+        </div>
+        
+        <div class="footer">
+            <p>Best regards,<br>The FreelanceHub Team</p>
+            <p>Need help? Contact us at <a href="mailto:{{supportEmail}}">{{supportEmail}}</a></p>
+        </div>
+    </div>
+</body>
+</html>

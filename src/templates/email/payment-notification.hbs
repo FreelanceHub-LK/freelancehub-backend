@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Notification - FreelanceHub</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; }
+        .header { text-align: center; padding: 20px 0; border-bottom: 1px solid #eee; }
+        .content { padding: 20px 0; }
+        .btn { display: inline-block; padding: 12px 24px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+        .footer { text-align: center; padding: 20px 0; border-top: 1px solid #eee; color: #666; font-size: 14px; }
+        .payment-details { background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745; }
+        .amount { font-size: 24px; font-weight: bold; color: #28a745; text-align: center; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>FreelanceHub</h1>
+            <h2>💰 Payment Notification</h2>
+        </div>
+        
+        <div class="content">
+            <h2>Hello {{userName}}!</h2>
+            
+            <p>This is to confirm your recent payment transaction:</p>
+            
+            <div class="payment-details">
+                <div class="amount">{{currency}} {{amount}}</div>
+                <p><strong>Transaction ID:</strong> {{transactionId}}</p>
+                <p><strong>Date:</strong> {{date}}</p>
+                <p><strong>Status:</strong> {{paymentType}}</p>
+            </div>
+            
+            <p>You can view all your payment history and download receipts from your payments dashboard.</p>
+            
+            <div style="text-align: center;">
+                <a href="{{paymentsUrl}}" class="btn">View Payments</a>
+            </div>
+            
+            <p><strong>Note:</strong> Please keep this email as your payment confirmation receipt.</p>
+        </div>
+        
+        <div class="footer">
+            <p>Best regards,<br>The FreelanceHub Team</p>
+            <p>For payment support, contact us at <a href="mailto:payments@freelancehub.com">payments@freelancehub.com</a></p>
+        </div>
+    </div>
+</body>
+</html>

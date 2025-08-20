@@ -1,23 +1,309 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger, Inject, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { Notification, NotificationDocument, NotificationType, NotificationPriority } from './schemas/notification.schema';
+import { EmailService } from '../email/email.service';
+
+export interface NotificationTemplate {
+  type: NotificationType;
+  title: string;
+  message: string;
+  emailTemplate?: string;
+  actionUrl?: string;
+}
 
 @Injectable()
 export class NotificationsService {
+  private readonly logger = new Logger(NotificationsService.name);
+
   constructor(
     @InjectModel(Notification.name)
     private notificationModel: Model<NotificationDocument>,
+    private readonly emailService: EmailService,
+    @Inject(forwardRef(() => 'MessagesGateway'))
+    private readonly messagesGateway?: any,
   ) {}
 
-  async create(createNotificationDto: CreateNotificationDto): Promise<Notification> {
+  async create(createNotificationDto: CreateNotificationDto): Promise<NotificationDocument> {
     const notification = new this.notificationModel({
       ...createNotificationDto,
       expiresAt: createNotificationDto.expiresAt ? new Date(createNotificationDto.expiresAt) : undefined,
     });
     return notification.save();
+  }
+
+  async createAndSend(
+    userId: string,
+    type: NotificationType,
+    data: {
+      title: string;
+      message: string;
+      actionUrl?: string;
+      metadata?: Record<string, any>;
+      priority?: NotificationPriority;
+      emailEnabled?: boolean;
+      pushEnabled?: boolean;
+    }
+  ): Promise<Notification> {
+    try {
+      // Create notification
+      const notification = await this.create({
+        userId,
+        type,
+        title: data.title,
+        message: data.message,
+        actionUrl: data.actionUrl,
+        metadata: data.metadata || {},
+        priority: data.priority || NotificationPriority.MEDIUM,
+      });
+
+      // Send real-time notification via WebSocket
+      if (this.messagesGateway) {
+        await this.messagesGateway.sendNotificationToUser(userId, {
+          id: (notification._id as any).toString(),
+          type: notification.type,
+          title: notification.title,
+          message: notification.message,
+          actionUrl: notification.actionUrl,
+          priority: notification.priority,
+          createdAt: notification.createdAt,
+        });
+      }
+
+      // Send email notification if enabled
+      if (data.emailEnabled && process.env.ENABLE_EMAIL_NOTIFICATIONS === 'true') {
+        await this.sendEmailNotification(userId, notification);
+      }
+
+      // Send push notification if enabled
+      if (data.pushEnabled && process.env.ENABLE_PUSH_NOTIFICATIONS === 'true') {
+        await this.sendPushNotification(userId, notification);
+      }
+
+      this.logger.log(`Notification created and sent to user ${userId}: ${type}`);
+      return notification;
+    } catch (error) {
+      this.logger.error(`Failed to create and send notification: ${error.message}`);
+      throw error;
+    }
+  }
+
+  private async sendEmailNotification(userId: string, notification: Notification): Promise<void> {
+    try {
+      // You would typically fetch user email from user service
+      // For now, we'll assume we have the user data in the notification
+      const userEmail = notification.metadata?.userEmail;
+      const userName = notification.metadata?.userName;
+
+      if (!userEmail) {
+        this.logger.warn(`No email found for user ${userId}, skipping email notification`);
+        return;
+      }
+
+      // Map notification types to email templates
+      const emailTemplateMap: Partial<Record<NotificationType, string>> = {
+        [NotificationType.PROJECT_UPDATED]: 'project-notification',
+        [NotificationType.PROPOSAL_SUBMITTED]: 'project-notification',
+        [NotificationType.PROPOSAL_ACCEPTED]: 'project-notification',
+        [NotificationType.PAYMENT_RECEIVED]: 'payment-notification',
+        [NotificationType.MESSAGE_RECEIVED]: 'message-notification',
+        [NotificationType.CONTRACT_SIGNED]: 'contract-notification',
+        [NotificationType.MILESTONE_COMPLETED]: 'project-notification',
+        [NotificationType.REVIEW_RECEIVED]: 'review-notification',
+        [NotificationType.SYSTEM_ANNOUNCEMENT]: 'system-notification',
+      };
+
+      const template = emailTemplateMap[notification.type];
+      if (template) {
+        await this.emailService.sendEmail({
+          to: userEmail,
+          subject: notification.title,
+          template,
+          templateData: {
+            userName,
+            title: notification.title,
+            message: notification.message,
+            actionUrl: notification.actionUrl,
+            ...notification.metadata,
+          },
+        });
+      }
+    } catch (error) {
+      this.logger.error(`Failed to send email notification: ${error.message}`);
+    }
+  }
+
+  private async sendPushNotification(userId: string, notification: Notification): Promise<void> {
+    try {
+      // Implement push notification logic here
+      // This would typically use a service like Firebase Cloud Messaging
+      this.logger.log(`Push notification would be sent to user ${userId}`);
+    } catch (error) {
+      this.logger.error(`Failed to send push notification: ${error.message}`);
+    }
+  }
+
+  // Specific notification methods for different events
+  async sendProjectNotification(
+    userId: string,
+    type: 'new_proposal' | 'proposal_accepted' | 'project_completed' | 'milestone_completed',
+    data: {
+      projectTitle: string;
+      projectId: string;
+      userEmail: string;
+      userName: string;
+      additionalData?: Record<string, any>;
+    }
+  ): Promise<void> {
+    const notifications = {
+      new_proposal: {
+        title: 'New Proposal Received',
+        message: `You have received a new proposal for "${data.projectTitle}"`,
+        type: NotificationType.PROPOSAL_SUBMITTED,
+      },
+      proposal_accepted: {
+        title: 'Proposal Accepted',
+        message: `Your proposal for "${data.projectTitle}" has been accepted!`,
+        type: NotificationType.PROPOSAL_ACCEPTED,
+      },
+      project_completed: {
+        title: 'Project Completed',
+        message: `Project "${data.projectTitle}" has been marked as completed`,
+        type: NotificationType.PROJECT_UPDATED,
+      },
+      milestone_completed: {
+        title: 'Milestone Completed',
+        message: `A milestone for "${data.projectTitle}" has been completed`,
+        type: NotificationType.MILESTONE_COMPLETED,
+      },
+    };
+
+    const notificationData = notifications[type];
+    await this.createAndSend(userId, notificationData.type, {
+      title: notificationData.title,
+      message: notificationData.message,
+      actionUrl: `/projects/${data.projectId}`,
+      metadata: {
+        projectId: data.projectId,
+        projectTitle: data.projectTitle,
+        userEmail: data.userEmail,
+        userName: data.userName,
+        ...data.additionalData,
+      },
+      emailEnabled: true,
+      priority: NotificationPriority.HIGH,
+    });
+  }
+
+  async sendPaymentNotification(
+    userId: string,
+    type: 'payment_received' | 'payment_sent' | 'escrow_released',
+    data: {
+      amount: number;
+      currency: string;
+      transactionId: string;
+      userEmail: string;
+      userName: string;
+    }
+  ): Promise<void> {
+    const notifications = {
+      payment_received: {
+        title: 'Payment Received',
+        message: `You have received a payment of ${data.currency} ${data.amount}`,
+      },
+      payment_sent: {
+        title: 'Payment Sent',
+        message: `Your payment of ${data.currency} ${data.amount} has been processed`,
+      },
+      escrow_released: {
+        title: 'Escrow Released',
+        message: `Escrow payment of ${data.currency} ${data.amount} has been released`,
+      },
+    };
+
+    const notificationData = notifications[type];
+    await this.createAndSend(userId, NotificationType.PAYMENT_RECEIVED, {
+      title: notificationData.title,
+      message: notificationData.message,
+      actionUrl: '/payments',
+      metadata: {
+        amount: data.amount,
+        currency: data.currency,
+        transactionId: data.transactionId,
+        userEmail: data.userEmail,
+        userName: data.userName,
+      },
+      emailEnabled: true,
+      priority: NotificationPriority.HIGH,
+    });
+  }
+
+  async sendMessageNotification(
+    userId: string,
+    data: {
+      senderName: string;
+      messagePreview: string;
+      conversationId: string;
+      userEmail: string;
+      userName: string;
+    }
+  ): Promise<void> {
+    await this.createAndSend(userId, NotificationType.MESSAGE_RECEIVED, {
+      title: `New message from ${data.senderName}`,
+      message: data.messagePreview,
+      actionUrl: `/messages/${data.conversationId}`,
+      metadata: {
+        conversationId: data.conversationId,
+        senderName: data.senderName,
+        userEmail: data.userEmail,
+        userName: data.userName,
+      },
+      emailEnabled: true,
+      priority: NotificationPriority.MEDIUM,
+    });
+  }
+
+  async sendContractNotification(
+    userId: string,
+    type: 'contract_created' | 'contract_signed' | 'contract_completed',
+    data: {
+      contractTitle: string;
+      contractId: string;
+      userEmail: string;
+      userName: string;
+    }
+  ): Promise<void> {
+    const notifications = {
+      contract_created: {
+        title: 'New Contract Created',
+        message: `A new contract "${data.contractTitle}" has been created`,
+      },
+      contract_signed: {
+        title: 'Contract Signed',
+        message: `Contract "${data.contractTitle}" has been signed`,
+      },
+      contract_completed: {
+        title: 'Contract Completed',
+        message: `Contract "${data.contractTitle}" has been completed`,
+      },
+    };
+
+    const notificationData = notifications[type];
+    await this.createAndSend(userId, NotificationType.CONTRACT_SIGNED, {
+      title: notificationData.title,
+      message: notificationData.message,
+      actionUrl: `/contracts/${data.contractId}`,
+      metadata: {
+        contractId: data.contractId,
+        contractTitle: data.contractTitle,
+        userEmail: data.userEmail,
+        userName: data.userName,
+      },
+      emailEnabled: true,
+      priority: NotificationPriority.HIGH,
+    });
   }
 
   async createBulk(notifications: CreateNotificationDto[]): Promise<Notification[]> {

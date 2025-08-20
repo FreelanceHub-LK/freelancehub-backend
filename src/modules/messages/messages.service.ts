@@ -388,7 +388,8 @@ export class MessagesService {
     }
   }
 
-  private async findOrCreateConversation(data: {
+  // Make this method public for use in gateway
+  async findOrCreateConversation(data: {
     participants: string[];
     project?: string;
     contract?: string;

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification - {{appName}}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; }
+        .header { text-align: center; padding: 20px 0; border-bottom: 1px solid #eee; }
+        .content { padding: 20px 0; }
+        .otp-code { background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 8px; margin: 20px 0; border-radius: 8px; border: 2px dashed #007bff; }
+        .footer { text-align: center; padding: 20px 0; border-top: 1px solid #eee; color: #666; font-size: 14px; }
+        .btn { display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{appName}}</h1>
+            <h2>Email Verification</h2>
+        </div>
+        
+        <div class="content">
+            <p>Thank you for registering with {{appName}}. To complete your registration, please use the following verification code:</p>
+            
+            <div class="otp-code">{{otp}}</div>
+            
+            <p><strong>Important:</strong> This code will expire in {{expiryMinutes}} minutes.</p>
+            
+            <p>If you didn't request this code, please ignore this email.</p>
+            
+            <p>For security reasons, never share this code with anyone.</p>
+        </div>
+        
+        <div class="footer">
+            <p>Best regards,<br>{{appName}} Team</p>
+            <p>This is an automated email. Please do not reply to this message.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -50,6 +50,9 @@ export class Notification {
   @Prop({ type: Object })
   data?: any; // Additional data related to the notification
 
+  @Prop({ type: Object })
+  metadata?: any; // Additional metadata for notifications
+
   @Prop({ default: false })
   isRead: boolean;
 

@@ -23,6 +23,10 @@ export class CreateNotificationDto {
   data?: any;
 
   @IsOptional()
+  @IsObject()
+  metadata?: any;
+
+  @IsOptional()
   @IsEnum(NotificationPriority)
   priority?: NotificationPriority;
 
