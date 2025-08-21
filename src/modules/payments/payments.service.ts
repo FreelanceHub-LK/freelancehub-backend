@@ -11,6 +11,7 @@ import { Model } from 'mongoose';
 import { ConfigType } from '@nestjs/config';
 import Stripe from 'stripe';
 import * as CryptoJS from 'crypto-js';
+import axios from 'axios';
 import { 
   Payment, 
   PaymentDocument, 
@@ -51,12 +52,14 @@ export interface PaymentListResult {
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
   private stripe: Stripe;
+  private paypalBaseUrl: string;
 
   constructor(
     @InjectModel(Payment.name) private paymentModel: Model<PaymentDocument>,
     @Inject(paymentConfig.KEY) private config: ConfigType<typeof paymentConfig>,
   ) {
     this.initializeStripe();
+    this.initializePayPal();
   }
 
   private initializeStripe(): void {
@@ -67,6 +70,17 @@ export class PaymentsService {
       this.logger.log('Stripe initialized successfully');
     } else {
       this.logger.warn('Stripe secret key not configured');
+    }
+  }
+
+  private initializePayPal(): void {
+    if (this.config.paypal.clientId && this.config.paypal.clientSecret) {
+      this.paypalBaseUrl = this.config.paypal.environment === 'live' 
+        ? 'https://api.paypal.com' 
+        : 'https://api.sandbox.paypal.com';
+      this.logger.log('PayPal initialized successfully');
+    } else {
+      this.logger.warn('PayPal credentials not configured');
     }
   }
 
@@ -207,19 +221,188 @@ export class PaymentsService {
   }
 
   /**
-   * Process PayPal payment (placeholder)
+   * Process PayPal payment
    */
   private async processPayPalPayment(payment: PaymentDocument): Promise<PaymentResult> {
-    // PayPal integration would go here
-    payment.status = PaymentStatus.PROCESSING;
-    await payment.save();
+    try {
+      if (!this.paypalBaseUrl) {
+        throw new InternalServerErrorException('PayPal not initialized');
+      }
 
-    return {
-      payment: payment.toObject(),
-      redirectUrl: `${process.env.FRONTEND_URL}/payment/paypal/${payment._id}`,
-      status: 'processing',
-      message: 'PayPal payment initiated'
-    };
+      // Get PayPal access token
+      const accessToken = await this.getPayPalAccessToken();
+
+      // Create PayPal order
+      const orderData = {
+        intent: 'CAPTURE',
+        purchase_units: [{
+          amount: {
+            currency_code: payment.currency.toUpperCase(),
+            value: (payment.amount / 100).toFixed(2), // Convert cents to dollars
+          },
+          description: payment.description || `${payment.type} payment`,
+          reference_id: (payment._id as any).toString(),
+        }],
+        application_context: {
+          brand_name: 'FreelanceHub',
+          landing_page: 'NO_PREFERENCE',
+          user_action: 'PAY_NOW',
+          return_url: `${process.env.FRONTEND_URL}/payment/paypal/success`,
+          cancel_url: `${process.env.FRONTEND_URL}/payment/paypal/cancel`,
+        },
+      };
+
+      const response = await axios.post(
+        `${this.paypalBaseUrl}/v2/checkout/orders`,
+        orderData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      const order = response.data;
+      
+      // Update payment with PayPal order ID
+      payment.metadata = {
+        ...payment.metadata,
+        paypalOrderId: order.id,
+      };
+      payment.status = PaymentStatus.PROCESSING;
+      await payment.save();
+
+      // Find approval URL
+      const approvalUrl = order.links.find((link: any) => link.rel === 'approve')?.href;
+
+      return {
+        payment: payment.toObject(),
+        redirectUrl: approvalUrl,
+        status: 'processing',
+        message: 'PayPal order created successfully'
+      };
+
+    } catch (error) {
+      this.logger.error(`PayPal payment processing failed: ${error.message}`);
+      payment.status = PaymentStatus.FAILED;
+      payment.failureReason = error.message;
+      await payment.save();
+      throw new InternalServerErrorException('Payment processing failed');
+    }
+  }
+
+  /**
+   * Get PayPal access token
+   */
+  private async getPayPalAccessToken(): Promise<string> {
+    try {
+      const credentials = Buffer.from(
+        `${this.config.paypal.clientId}:${this.config.paypal.clientSecret}`
+      ).toString('base64');
+
+      const response = await axios.post(
+        `${this.paypalBaseUrl}/v1/oauth2/token`,
+        'grant_type=client_credentials',
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Authorization: `Basic ${credentials}`,
+          },
+        }
+      );
+
+      return response.data.access_token;
+    } catch (error) {
+      this.logger.error(`Failed to get PayPal access token: ${error.message}`);
+      throw new InternalServerErrorException('PayPal authentication failed');
+    }
+  }
+
+  /**
+   * Capture PayPal payment
+   */
+  async capturePayPalPayment(paymentId: string, paypalOrderId: string): Promise<PaymentResult> {
+    try {
+      const payment = await this.paymentModel.findById(paymentId);
+      if (!payment) {
+        throw new NotFoundException('Payment not found');
+      }
+
+      // Get PayPal access token
+      const accessToken = await this.getPayPalAccessToken();
+
+      // Capture the order
+      const response = await axios.post(
+        `${this.paypalBaseUrl}/v2/checkout/orders/${paypalOrderId}/capture`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      const captureData = response.data;
+      
+      // Update payment status based on capture result
+      if (captureData.status === 'COMPLETED') {
+        payment.status = PaymentStatus.COMPLETED;
+        payment.processedAt = new Date();
+        payment.metadata = {
+          ...payment.metadata,
+          paypalCaptureId: captureData.id,
+          paypalCaptureData: captureData,
+        };
+      } else {
+        payment.status = PaymentStatus.FAILED;
+        payment.failureReason = `PayPal capture failed: ${captureData.status}`;
+      }
+
+      await payment.save();
+
+      return {
+        payment: payment.toObject(),
+        status: payment.status === PaymentStatus.COMPLETED ? 'completed' : 'failed',
+        message: payment.status === PaymentStatus.COMPLETED 
+          ? 'Payment captured successfully' 
+          : 'Payment capture failed'
+      };
+
+    } catch (error) {
+      this.logger.error(`PayPal capture failed: ${error.message}`);
+      throw new InternalServerErrorException('Payment capture failed');
+    }
+  }
+
+  /**
+   * Find payment by metadata field
+   */
+  async findByMetadata(key: string, value: string): Promise<PaymentDocument | null> {
+    return this.paymentModel.findOne({
+      [`metadata.${key}`]: value
+    });
+  }
+
+  /**
+   * Update payment status
+   */
+  async updatePaymentStatus(paymentId: string, status: PaymentStatus): Promise<PaymentDocument> {
+    const payment = await this.paymentModel.findByIdAndUpdate(
+      paymentId,
+      { 
+        status,
+        processedAt: status === PaymentStatus.COMPLETED ? new Date() : undefined
+      },
+      { new: true }
+    );
+
+    if (!payment) {
+      throw new NotFoundException('Payment not found');
+    }
+
+    return payment;
   }
 
   /**

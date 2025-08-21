@@ -14,6 +14,7 @@ import {
   ClassSerializerInterceptor,
   Logger,
   BadRequestException,
+  Headers,
 } from '@nestjs/common';
 import { 
   ApiTags, 
@@ -33,7 +34,7 @@ import {
   RefundDto,
   WithdrawDto,
 } from './dto/index';
-import { Payment } from './schemas/payment.schema';
+import { Payment, PaymentStatus } from './schemas/payment.schema';
 
 @ApiTags('payments')
 @Controller('payments')
@@ -329,24 +330,183 @@ export class PaymentsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Handle Stripe webhooks' })
   @ApiResponse({ status: 200, description: 'Webhook processed successfully' })
-  async handleStripeWebhook(@Body() payload: any) {
+  async handleStripeWebhook(@Body() payload: any, @Headers('stripe-signature') signature: string) {
     try {
       this.logger.log('Processing Stripe webhook');
       
-      // Webhook processing logic would go here
-      // You would typically:
-      // 1. Verify webhook signature
-      // 2. Parse webhook event
-      // 3. Update payment status based on event type
-      // 4. Handle different event types (payment_intent.succeeded, payment_intent.payment_failed, etc.)
+      // Verify webhook signature
+      if (!signature) {
+        throw new BadRequestException('Missing stripe-signature header');
+      }
+
+      // In a real implementation, you would verify the webhook signature here
+      // const event = this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+      
+      const event = payload;
+      
+      // Handle different event types
+      switch (event.type) {
+        case 'payment_intent.succeeded':
+          await this.handleStripePaymentSucceeded(event.data.object);
+          break;
+        case 'payment_intent.payment_failed':
+          await this.handleStripePaymentFailed(event.data.object);
+          break;
+        case 'payment_intent.canceled':
+          await this.handleStripePaymentCanceled(event.data.object);
+          break;
+        default:
+          this.logger.warn(`Unhandled Stripe event type: ${event.type}`);
+      }
       
       return {
         success: true,
         message: 'Webhook processed successfully',
       };
     } catch (error) {
-      this.logger.error(`Failed to process webhook: ${error.message}`, error.stack);
+      this.logger.error(`Failed to process Stripe webhook: ${error.message}`, error.stack);
       throw error;
+    }
+  }
+
+  @Post('webhooks/paypal')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Handle PayPal webhooks' })
+  @ApiResponse({ status: 200, description: 'Webhook processed successfully' })
+  async handlePayPalWebhook(@Body() payload: any, @Headers() headers: any) {
+    try {
+      this.logger.log('Processing PayPal webhook');
+      
+      // Verify webhook signature (in production, you should verify this)
+      // const isValid = await this.verifyPayPalWebhook(payload, headers);
+      // if (!isValid) {
+      //   throw new BadRequestException('Invalid webhook signature');
+      // }
+      
+      const event = payload;
+      
+      // Handle different event types
+      switch (event.event_type) {
+        case 'CHECKOUT.ORDER.APPROVED':
+          await this.handlePayPalOrderApproved(event.resource);
+          break;
+        case 'PAYMENT.CAPTURE.COMPLETED':
+          await this.handlePayPalCaptureCompleted(event.resource);
+          break;
+        case 'PAYMENT.CAPTURE.DENIED':
+          await this.handlePayPalCaptureDenied(event.resource);
+          break;
+        default:
+          this.logger.warn(`Unhandled PayPal event type: ${event.event_type}`);
+      }
+      
+      return {
+        success: true,
+        message: 'PayPal webhook processed successfully',
+      };
+    } catch (error) {
+      this.logger.error(`Failed to process PayPal webhook: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  @Post('paypal/capture/:paymentId')
+  @ApiOperation({ summary: 'Capture PayPal payment' })
+  @ApiResponse({ status: 200, description: 'Payment captured successfully' })
+  async capturePayPalPayment(
+    @Param('paymentId') paymentId: string,
+    @Body() captureDto: { paypalOrderId: string }
+  ) {
+    try {
+      this.logger.log(`Capturing PayPal payment: ${paymentId}`);
+      const result = await this.paymentsService.capturePayPalPayment(paymentId, captureDto.paypalOrderId);
+      return {
+        success: true,
+        message: 'Payment captured successfully',
+        data: result,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to capture PayPal payment: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  // Webhook event handlers
+  private async handleStripePaymentSucceeded(paymentIntent: any) {
+    try {
+      const payment = await this.paymentsService.findByMetadata('stripePaymentIntentId', paymentIntent.id);
+      if (payment) {
+        await this.paymentsService.updatePaymentStatus((payment._id as any).toString(), PaymentStatus.COMPLETED);
+        this.logger.log(`Payment ${payment._id} marked as completed via Stripe webhook`);
+      }
+    } catch (error) {
+      this.logger.error(`Error handling Stripe payment succeeded: ${error.message}`);
+    }
+  }
+
+  private async handleStripePaymentFailed(paymentIntent: any) {
+    try {
+      const payment = await this.paymentsService.findByMetadata('stripePaymentIntentId', paymentIntent.id);
+      if (payment) {
+        await this.paymentsService.updatePaymentStatus((payment._id as any).toString(), PaymentStatus.FAILED);
+        this.logger.log(`Payment ${payment._id} marked as failed via Stripe webhook`);
+      }
+    } catch (error) {
+      this.logger.error(`Error handling Stripe payment failed: ${error.message}`);
+    }
+  }
+
+  private async handleStripePaymentCanceled(paymentIntent: any) {
+    try {
+      const payment = await this.paymentsService.findByMetadata('stripePaymentIntentId', paymentIntent.id);
+      if (payment) {
+        await this.paymentsService.updatePaymentStatus((payment._id as any).toString(), PaymentStatus.CANCELLED);
+        this.logger.log(`Payment ${payment._id} marked as cancelled via Stripe webhook`);
+      }
+    } catch (error) {
+      this.logger.error(`Error handling Stripe payment canceled: ${error.message}`);
+    }
+  }
+
+  private async handlePayPalOrderApproved(resource: any) {
+    try {
+      const payment = await this.paymentsService.findByMetadata('paypalOrderId', resource.id);
+      if (payment) {
+        this.logger.log(`PayPal order ${resource.id} approved for payment ${payment._id}`);
+        // The order is approved but not yet captured
+      }
+    } catch (error) {
+      this.logger.error(`Error handling PayPal order approved: ${error.message}`);
+    }
+  }
+
+  private async handlePayPalCaptureCompleted(resource: any) {
+    try {
+      const orderId = resource.supplementary_data?.related_ids?.order_id;
+      if (orderId) {
+        const payment = await this.paymentsService.findByMetadata('paypalOrderId', orderId);
+        if (payment) {
+          await this.paymentsService.updatePaymentStatus((payment._id as any).toString(), PaymentStatus.COMPLETED);
+          this.logger.log(`Payment ${payment._id} marked as completed via PayPal webhook`);
+        }
+      }
+    } catch (error) {
+      this.logger.error(`Error handling PayPal capture completed: ${error.message}`);
+    }
+  }
+
+  private async handlePayPalCaptureDenied(resource: any) {
+    try {
+      const orderId = resource.supplementary_data?.related_ids?.order_id;
+      if (orderId) {
+        const payment = await this.paymentsService.findByMetadata('paypalOrderId', orderId);
+        if (payment) {
+          await this.paymentsService.updatePaymentStatus((payment._id as any).toString(), PaymentStatus.FAILED);
+          this.logger.log(`Payment ${payment._id} marked as failed via PayPal webhook`);
+        }
+      }
+    } catch (error) {
+      this.logger.error(`Error handling PayPal capture denied: ${error.message}`);
     }
   }
 }
