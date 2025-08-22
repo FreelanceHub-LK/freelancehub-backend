@@ -134,6 +134,36 @@ export class FreelancersController {
     return this.freelancersService.findOneByUserId(userId);
   }
 
+  @Get('dashboard')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.FREELANCER)
+  @ApiOperation({ summary: 'Get freelancer dashboard data including ongoing projects' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Dashboard data retrieved successfully'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Freelancer not found' 
+  })
+  async getFreelancerDashboard(@GetCurrentUser('id') userId: string) {
+    // For now, return basic dashboard data using existing services
+    const profile = await this.freelancersService.findOneByUserId(userId);
+    
+    return {
+      success: true,
+      data: {
+        profile: {
+          skills: profile.skills,
+          hourlyRate: profile.hourlyRate,
+          isAvailable: profile.isAvailable,
+          completedProjects: profile.completedProjects,
+        },
+        message: 'Use specific endpoints for contracts (/contracts), proposals (/proposals/my-proposals), and analytics (/analytics/my-analytics)'
+      }
+    };
+  }
+
   @Get('top-rated')
   @ApiOperation({ summary: 'Get top-rated freelancers' })
   @ApiResponse({ 

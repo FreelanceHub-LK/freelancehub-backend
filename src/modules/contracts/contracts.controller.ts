@@ -17,6 +17,7 @@ import {
   Request,
   Ip,
   Headers,
+  Res,
 } from '@nestjs/common';
 import { 
   ApiTags, 
@@ -26,7 +27,9 @@ import {
   ApiParam,
   ApiQuery
 } from '@nestjs/swagger';
+import { Response } from 'express';
 import { ContractsService } from './contracts.service';
+import { ContractPdfService } from './pdf.service';
 import {
   CreateContractDto,
   UpdateContractDto,
@@ -47,7 +50,10 @@ import { UserRole } from '../users/schemas/user.schema';
 export class ContractsController {
   private readonly logger = new Logger(ContractsController.name);
 
-  constructor(private readonly contractsService: ContractsService) {}
+  constructor(
+    private readonly contractsService: ContractsService,
+    private readonly contractPdfService: ContractPdfService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -142,6 +148,63 @@ export class ContractsController {
     @Request() req: any,
   ): Promise<Contract> {
     return this.contractsService.findOne(id, req.user.id);
+  }
+
+  @Get(':id/download-pdf')
+  @ApiOperation({ summary: 'Download contract as PDF' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Contract PDF generated and downloaded successfully',
+    schema: {
+      type: 'string',
+      format: 'binary',
+    }
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Contract not found' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Access denied to this contract' 
+  })
+  @ApiResponse({ 
+    status: 500, 
+    description: 'Error generating PDF' 
+  })
+  @ApiParam({ name: 'id', description: 'Contract ID' })
+  async downloadContractPdf(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Res() res: Response,
+  ): Promise<void> {
+    try {
+      // Get the full contract data with populated fields
+      const contractData = await this.contractsService.findOneForPdf(id, req.user.id);
+      
+      // Generate PDF
+      const pdfBuffer = await this.contractPdfService.generateContractPdf(contractData);
+      
+      // Set response headers for PDF download
+      const filename = `Contract_${contractData.title.replace(/[^a-zA-Z0-9]/g, '_')}_${contractData._id}.pdf`;
+      
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Length': pdfBuffer.length,
+      });
+      
+      res.send(pdfBuffer);
+      
+      this.logger.log(`PDF downloaded for contract ${id} by user ${req.user.id}`);
+    } catch (error) {
+      this.logger.error(`Error generating PDF for contract ${id}: ${error.message}`);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Failed to generate PDF',
+        error: error.message,
+      });
+    }
   }
 
   @Patch(':id')

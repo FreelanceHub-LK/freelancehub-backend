@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ContractsController } from './contracts.controller';
 import { ContractsService } from './contracts.service';
+import { ContractPdfService } from './pdf.service';
 import { Contract, ContractSchema } from './schemas/contract.schema';
 
 @Module({
@@ -11,7 +12,7 @@ import { Contract, ContractSchema } from './schemas/contract.schema';
     ]),
   ],
   controllers: [ContractsController],
-  providers: [ContractsService],
-  exports: [ContractsService],
+  providers: [ContractsService, ContractPdfService],
+  exports: [ContractsService, ContractPdfService],
 })
 export class ContractsModule {}

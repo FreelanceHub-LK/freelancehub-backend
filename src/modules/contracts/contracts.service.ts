@@ -204,6 +204,67 @@ export class ContractsService {
     }
   }
 
+  async findOneForPdf(id: string, userId?: string): Promise<any> {
+    try {
+      const filter: any = { _id: id };
+      
+      // If userId provided, ensure user has access to this contract
+      if (userId) {
+        filter.$or = [
+          { client: userId },
+          { freelancer: userId }
+        ];
+      }
+
+      const contract = await this.contractModel
+        .findOne(filter)
+        .populate({
+          path: 'project',
+          select: 'title description budget deadline category',
+          populate: {
+            path: 'category',
+            select: 'name'
+          }
+        })
+        .populate({
+          path: 'client',
+          select: 'firstName lastName email company avatar'
+        })
+        .populate({
+          path: 'freelancer',
+          select: 'firstName lastName email avatar'
+        })
+        .exec();
+
+      if (!contract) {
+        throw new NotFoundException('Contract not found or access denied');
+      }
+
+      // Get freelancer profile data if freelancer exists
+      let freelancerProfile: any = null;
+      if (contract.freelancer) {
+        try {
+          // This assumes you have access to the freelancer model or service
+          // For now, we'll include basic data and you can expand this later
+          freelancerProfile = {
+            skills: [], // You might need to fetch this from freelancer profile
+            hourlyRate: contract.hourlyRate || 0,
+          };
+        } catch (error) {
+          this.logger.warn(`Could not fetch freelancer profile: ${error.message}`);
+        }
+      }
+
+      return {
+        ...contract.toObject(),
+        freelancerProfile,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to find contract for PDF ${id}: ${error.message}`);
+      throw error;
+    }
+  }
+
   async update(id: string, updateContractDto: UpdateContractDto, userId: string): Promise<Contract> {
     try {
       const contract = await this.contractModel.findById(id);

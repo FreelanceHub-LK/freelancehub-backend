@@ -1804,6 +1804,215 @@
       ]
     },
     {
+      "name": "Contracts",
+      "item": [
+        {
+          "name": "Create Contract",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Website Development Contract\",\n  \"description\": \"Contract for developing a modern responsive website\",\n  \"type\": \"FIXED\",\n  \"amount\": 100000,\n  \"currency\": \"LKR\",\n  \"startDate\": \"2024-09-01T00:00:00.000Z\",\n  \"endDate\": \"2024-12-01T00:00:00.000Z\",\n  \"projectId\": \"{{project_id}}\",\n  \"clientId\": \"{{client_id}}\",\n  \"freelancerId\": \"{{freelancer_id}}\",\n  \"terms\": \"Standard freelance contract terms and conditions\",\n  \"scope\": \"Full website development including frontend and backend\",\n  \"paymentTerms\": \"50% upfront, 50% on completion\",\n  \"milestones\": [\n    {\n      \"title\": \"Design Phase\",\n      \"description\": \"Complete UI/UX design\",\n      \"amount\": 50000,\n      \"dueDate\": \"2024-09-30T00:00:00.000Z\"\n    },\n    {\n      \"title\": \"Development Phase\",\n      \"description\": \"Complete development and testing\",\n      \"amount\": 50000,\n      \"dueDate\": \"2024-11-30T00:00:00.000Z\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/contracts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contracts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Contracts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/contracts?page={{page}}&limit={{limit}}&status={{contract_status}}&type={{contract_type}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contracts"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                },
+                {
+                  "key": "status",
+                  "value": "{{contract_status}}"
+                },
+                {
+                  "key": "type",
+                  "value": "{{contract_type}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Contract by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/contracts/{{contract_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contracts",
+                "{{contract_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Contract",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Contract Title\",\n  \"description\": \"Updated contract description\",\n  \"status\": \"IN_PROGRESS\",\n  \"terms\": \"Updated terms and conditions\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/contracts/{{contract_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contracts",
+                "{{contract_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sign Contract",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userType\": \"CLIENT\",\n  \"ipAddress\": \"192.168.1.1\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/contracts/{{contract_id}}/sign",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contracts",
+                "{{contract_id}}",
+                "sign"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download Contract PDF",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/contracts/{{contract_id}}/download-pdf",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contracts",
+                "{{contract_id}}",
+                "download-pdf"
+              ]
+            },
+            "description": "Download contract as a PDF document with all details including project information, party details, milestones, signatures, and terms."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Contract",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/contracts/{{contract_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contracts",
+                "{{contract_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "App Info",
       "item": [
         {
@@ -2005,6 +2214,31 @@
     {
       "key": "end_date",
       "value": "2024-12-31",
+      "type": "string"
+    },
+    {
+      "key": "contract_status",
+      "value": "ACTIVE",
+      "type": "string"
+    },
+    {
+      "key": "contract_type",
+      "value": "FIXED",
+      "type": "string"
+    },
+    {
+      "key": "client_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "freelancer_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "milestone_id",
+      "value": "",
       "type": "string"
     }
   ]
