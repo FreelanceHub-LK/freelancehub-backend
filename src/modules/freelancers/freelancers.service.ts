@@ -258,6 +258,70 @@ export class FreelancersService {
     }
   }
 
+  async addSkill(id: string, skill: string): Promise<Freelancer> {
+    try {
+      const freelancer = await this.freelancerModel.findById(id);
+      if (!freelancer) {
+        throw new NotFoundException('Freelancer not found');
+      }
+
+      // Check if skill already exists
+      if (freelancer.skills.includes(skill)) {
+        throw new BadRequestException('Skill already exists in freelancer profile');
+      }
+
+      const updatedFreelancer = await this.freelancerModel
+        .findByIdAndUpdate(
+          id, 
+          { $addToSet: { skills: skill } }, 
+          { new: true }
+        )
+        .populate('userId', 'firstName lastName email profilePicture rating reviewCount')
+        .exec();
+
+      if (!updatedFreelancer) {
+        throw new NotFoundException('Freelancer not found');
+      }
+
+      return updatedFreelancer;
+    } catch (error) {
+      this.logger.error(`Error adding skill to freelancer: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async removeSkill(id: string, skill: string): Promise<Freelancer> {
+    try {
+      const freelancer = await this.freelancerModel.findById(id);
+      if (!freelancer) {
+        throw new NotFoundException('Freelancer not found');
+      }
+
+      // Check if skill exists
+      if (!freelancer.skills.includes(skill)) {
+        throw new NotFoundException('Skill not found in freelancer profile');
+      }
+
+      const updatedFreelancer = await this.freelancerModel
+        .findByIdAndUpdate(
+          id, 
+          { $pull: { skills: skill } }, 
+          { new: true }
+        )
+        .populate('userId', 'firstName lastName email profilePicture rating reviewCount')
+        .exec();
+
+      if (!updatedFreelancer) {
+        throw new NotFoundException('Freelancer not found');
+      }
+
+      return updatedFreelancer;
+    } catch (error) {
+      this.logger.error(`Error removing skill from freelancer: ${error.message}`);
+      throw error;
+    }
+  }
+
   private async findOneByIdWithUser(id: string): Promise<Freelancer> {
     try {
       const freelancer = await this.freelancerModel

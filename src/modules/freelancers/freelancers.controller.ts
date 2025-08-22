@@ -215,10 +215,53 @@ export class FreelancersController {
     return this.freelancersService.update(id, updateFreelancerDto);
   }
 
+  @Post('me/skills')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.FREELANCER)
+  @ApiOperation({ summary: 'Add a skill to freelancer profile' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Skill added successfully',
+    type: Freelancer
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Skill already exists or invalid skill' 
+  })
+  async addMySkill(
+    @GetCurrentUser('id') userId: string,
+    @Body('skill') skill: string,
+  ): Promise<Freelancer> {
+    const freelancer = await this.freelancersService.findOneByUserId(userId);
+    return this.freelancersService.addSkill((freelancer as any)._id.toString(), skill);
+  }
+
+  @Delete('me/skills/:skill')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.FREELANCER)
+  @ApiOperation({ summary: 'Remove a skill from freelancer profile' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Skill removed successfully',
+    type: Freelancer
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Skill not found in freelancer profile' 
+  })
+  @ApiParam({ name: 'skill', description: 'Skill name to remove' })
+  async removeMySkill(
+    @GetCurrentUser('id') userId: string,
+    @Param('skill') skill: string,
+  ): Promise<Freelancer> {
+    const freelancer = await this.freelancersService.findOneByUserId(userId);
+    return this.freelancersService.removeSkill((freelancer as any)._id.toString(), skill);
+  }
+
   @Patch('me/skills')
   @UseGuards(RolesGuard)
   @Roles(UserRole.FREELANCER)
-  @ApiOperation({ summary: 'Update freelancer skills' })
+  @ApiOperation({ summary: 'Update all freelancer skills (replace existing)' })
   @ApiResponse({ 
     status: 200, 
     description: 'Skills updated successfully',
