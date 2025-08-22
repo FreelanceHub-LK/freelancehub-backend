@@ -4,6 +4,7 @@ import {
   Post,
   Body,
   Patch,
+  Put,
   Param,
   Delete,
   Query,
@@ -25,7 +26,17 @@ import {
   ApiQuery
 } from '@nestjs/swagger';
 import { FreelancersService } from './freelancers.service';
-import { CreateFreelancerDto, UpdateFreelancerDto, QueryFreelancerDto } from './dto';
+import { 
+  CreateFreelancerDto, 
+  UpdateFreelancerDto, 
+  QueryFreelancerDto,
+  UpdateSkillsDto,
+  UpdateRateDto,
+  UpdateEducationDto,
+  UpdateAvailabilityDto,
+  UpdateCertificationsDto,
+  UpdatePortfolioDto
+} from './dto';
 import { Freelancer } from './schemas/freelancer.schema';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -290,6 +301,158 @@ export class FreelancersController {
   ): Promise<Freelancer> {
     const freelancer = await this.freelancersService.findOneByUserId(userId);
     return this.freelancersService.updateAvailability((freelancer as any)._id.toString(), isAvailable);
+  }
+
+  // ===== New Comprehensive Profile Management Endpoints =====
+
+  @Put('me/skills')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.FREELANCER)
+  @ApiOperation({ summary: 'Update freelancer skills (replace all)' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Skills updated successfully',
+    type: Freelancer
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Invalid skills data' 
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Freelancer profile not found' 
+  })
+  async updateMySkillsComprehensive(
+    @GetCurrentUser('id') userId: string,
+    @Body() updateSkillsDto: UpdateSkillsDto,
+  ): Promise<Freelancer> {
+    const freelancer = await this.freelancersService.findOneByUserId(userId);
+    return this.freelancersService.updateFreelancerSkills((freelancer as any)._id.toString(), updateSkillsDto);
+  }
+
+  @Put('me/rate')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.FREELANCER)
+  @ApiOperation({ summary: 'Update freelancer hourly rate' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Hourly rate updated successfully',
+    type: Freelancer
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Invalid rate data' 
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Freelancer profile not found' 
+  })
+  async updateMyRate(
+    @GetCurrentUser('id') userId: string,
+    @Body() updateRateDto: UpdateRateDto,
+  ): Promise<Freelancer> {
+    const freelancer = await this.freelancersService.findOneByUserId(userId);
+    return this.freelancersService.updateFreelancerRate((freelancer as any)._id.toString(), updateRateDto);
+  }
+
+  @Put('me/education')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.FREELANCER)
+  @ApiOperation({ summary: 'Update freelancer education' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Education updated successfully',
+    type: Freelancer
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Invalid education data' 
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Freelancer profile not found' 
+  })
+  async updateMyEducation(
+    @GetCurrentUser('id') userId: string,
+    @Body() updateEducationDto: UpdateEducationDto,
+  ): Promise<Freelancer> {
+    const freelancer = await this.freelancersService.findOneByUserId(userId);
+    return this.freelancersService.updateFreelancerEducation((freelancer as any)._id.toString(), updateEducationDto);
+  }
+
+  @Put('me/availability')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.FREELANCER)
+  @ApiOperation({ summary: 'Update freelancer availability status' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Availability updated successfully',
+    type: Freelancer
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Invalid availability data' 
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Freelancer profile not found' 
+  })
+  async updateMyAvailabilityComprehensive(
+    @GetCurrentUser('id') userId: string,
+    @Body() updateAvailabilityDto: UpdateAvailabilityDto,
+  ): Promise<Freelancer> {
+    const freelancer = await this.freelancersService.findOneByUserId(userId);
+    return this.freelancersService.updateFreelancerAvailability((freelancer as any)._id.toString(), updateAvailabilityDto);
+  }
+
+  @Put('me/certifications')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.FREELANCER)
+  @ApiOperation({ summary: 'Update freelancer certifications (replace all)' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Certifications updated successfully',
+    type: Freelancer
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Invalid certifications data' 
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Freelancer profile not found' 
+  })
+  async updateMyCertifications(
+    @GetCurrentUser('id') userId: string,
+    @Body() updateCertificationsDto: UpdateCertificationsDto,
+  ): Promise<Freelancer> {
+    const freelancer = await this.freelancersService.findOneByUserId(userId);
+    return this.freelancersService.updateFreelancerCertifications((freelancer as any)._id.toString(), updateCertificationsDto);
+  }
+
+  @Put('me/portfolio')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.FREELANCER)
+  @ApiOperation({ summary: 'Update freelancer portfolio links (replace all)' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Portfolio links updated successfully',
+    type: Freelancer
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Invalid portfolio data' 
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Freelancer profile not found' 
+  })
+  async updateMyPortfolio(
+    @GetCurrentUser('id') userId: string,
+    @Body() updatePortfolioDto: UpdatePortfolioDto,
+  ): Promise<Freelancer> {
+    const freelancer = await this.freelancersService.findOneByUserId(userId);
+    return this.freelancersService.updateFreelancerPortfolio((freelancer as any)._id.toString(), updatePortfolioDto);
   }
 
   @Delete(':id')

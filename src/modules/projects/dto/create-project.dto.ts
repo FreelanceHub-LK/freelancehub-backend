@@ -8,47 +8,112 @@ import {
   IsDateString, 
   IsOptional, 
   IsEnum,
-  IsArray
+  IsArray,
+  MaxLength,
+  Min,
+  ValidateNested
 } from 'class-validator';
-import { ProjectStatus } from '../schemas/project.schema';
+import { Type } from 'class-transformer';
+import { ProjectStatus, BudgetType } from '../schemas/project.schema';
+
+export class CreateProjectAttachmentDto {
+  @ApiProperty({ description: 'File name' })
+  @IsString()
+  @IsNotEmpty()
+  filename: string;
+
+  @ApiProperty({ description: 'Original file name' })
+  @IsString()
+  @IsNotEmpty()
+  originalName: string;
+
+  @ApiProperty({ description: 'MIME type' })
+  @IsString()
+  @IsNotEmpty()
+  mimeType: string;
+
+  @ApiProperty({ description: 'File size in bytes' })
+  @IsNumber()
+  @Min(0)
+  size: number;
+
+  @ApiProperty({ description: 'File URL' })
+  @IsString()
+  @IsNotEmpty()
+  url: string;
+}
 
 export class CreateProjectDto {
-  @ApiProperty({ description: 'Project title' })
+  @ApiProperty({ 
+    description: 'Project title',
+    example: 'E-commerce Website Development'
+  })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(255)
   title: string;
 
-  @ApiProperty({ description: 'Detailed project description' })
+  @ApiProperty({ 
+    description: 'Detailed project description',
+    example: 'Need a modern e-commerce platform with React frontend and Node.js backend'
+  })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(10000)
   description: string;
 
   @ApiProperty({ description: 'Client ID creating the project' })
   @IsMongoId()
   client: string;
 
-  @ApiProperty({ description: 'Category ID for the project' })
+  @ApiProperty({ 
+    description: 'Category ID for the project',
+    example: 'web-development'
+  })
   @IsMongoId()
   category: string;
 
   @ApiProperty({ 
     description: 'Required skills for the project',
     type: [String],
-    required: false
+    required: false,
+    example: ['react', 'nodejs', 'mongodb']
   })
   @IsArray()
   @IsMongoId({ each: true })
   @IsOptional()
   requiredSkills?: string[];
 
-  @ApiProperty({ description: 'Project budget in LKR' })
+  @ApiProperty({ 
+    description: 'Budget type',
+    enum: BudgetType,
+    example: BudgetType.FIXED
+  })
+  @IsEnum(BudgetType)
+  budgetType: BudgetType;
+
+  @ApiProperty({ 
+    description: 'Project budget amount',
+    example: 150000
+  })
   @IsNumber()
   @IsPositive()
-  budget: number;
+  budgetAmount: number;
+
+  @ApiProperty({ 
+    description: 'Currency code',
+    example: 'LKR',
+    default: 'LKR'
+  })
+  @IsString()
+  @IsOptional()
+  @MaxLength(3)
+  currency?: string;
 
   @ApiProperty({ 
     description: 'Project deadline', 
-    required: false 
+    required: false,
+    example: '2025-04-15T00:00:00Z'
   })
   @IsDateString()
   @IsOptional()
@@ -65,12 +130,13 @@ export class CreateProjectDto {
   status?: ProjectStatus;
 
   @ApiProperty({ 
-    description: 'Project attachments URLs',
-    type: [String],
+    description: 'Project attachments',
+    type: [CreateProjectAttachmentDto],
     required: false 
   })
   @IsArray()
-  @IsString({ each: true })
+  @ValidateNested({ each: true })
+  @Type(() => CreateProjectAttachmentDto)
   @IsOptional()
-  attachments?: string[];
+  attachments?: CreateProjectAttachmentDto[];
 }

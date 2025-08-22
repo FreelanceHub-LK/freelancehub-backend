@@ -229,13 +229,50 @@ export class ProposalsController {
     return this.proposalsService.update(id, updateProposalDto);
   }
 
-  @Patch(':id/status')
+  @Patch(':id/accept')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.CLIENT, UserRole.ADMIN)
-  @ApiOperation({ summary: 'Update proposal status (accept/reject by client)' })
+  @Roles(UserRole.CLIENT)
+  @ApiOperation({ summary: 'Accept proposal and create contract' })
   @ApiResponse({ 
     status: 200, 
-    description: 'Proposal status updated successfully',
+    description: 'Proposal accepted and contract created successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        data: {
+          type: 'object',
+          properties: {
+            contract_id: { type: 'string', example: 'contract_789' },
+            status: { type: 'string', example: 'active' },
+            milestones_count: { type: 'number', example: 2 },
+            freelancer_id: { type: 'string', example: 'user_456' },
+            client_id: { type: 'string', example: 'user_123' }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - insufficient permissions' 
+  })
+  @ApiParam({ name: 'id', description: 'Proposal ID' })
+  async acceptProposal(
+    @Param('id') id: string,
+    @Body() contractTerms: any,
+    @Request() req: any,
+  ) {
+    return this.proposalsService.acceptProposal(id, contractTerms, req.user.id);
+  }
+
+  @Patch(':id/reject')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.CLIENT)
+  @ApiOperation({ summary: 'Reject proposal' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Proposal rejected successfully',
     type: Proposal
   })
   @ApiResponse({ 
@@ -243,12 +280,11 @@ export class ProposalsController {
     description: 'Forbidden - insufficient permissions' 
   })
   @ApiParam({ name: 'id', description: 'Proposal ID' })
-  async updateStatus(
+  async rejectProposal(
     @Param('id') id: string,
-    @Body('status') status: ProposalStatus,
     @Request() req: any,
   ): Promise<Proposal> {
-    return this.proposalsService.changeStatus(id, status);
+    return this.proposalsService.rejectProposal(id, req.user.id);
   }
 
   @Patch(':id/withdraw')

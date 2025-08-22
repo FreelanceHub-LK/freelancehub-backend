@@ -496,4 +496,228 @@ export class ContractsService {
       throw new BadRequestException('Failed to retrieve contract statistics');
     }
   }
+
+  async submitMilestone(
+    contractId: string, 
+    milestoneIndex: number, 
+    deliverables: any, 
+    userId: string
+  ): Promise<any> {
+    const contract = await this.contractModel.findById(contractId);
+    
+    if (!contract) {
+      throw new NotFoundException(`Contract with ID ${contractId} not found`);
+    }
+
+    // Check if user is the freelancer
+    if (contract.freelancer.toString() !== userId) {
+      throw new ForbiddenException('Only the assigned freelancer can submit milestones');
+    }
+
+    if (milestoneIndex >= contract.milestones.length) {
+      throw new NotFoundException(`Milestone at index ${milestoneIndex} not found`);
+    }
+
+    const milestone = contract.milestones[milestoneIndex];
+    
+    if (milestone.status !== MilestoneStatus.PENDING && milestone.status !== MilestoneStatus.IN_PROGRESS) {
+      throw new BadRequestException('Milestone cannot be submitted in its current state');
+    }
+
+    // Update milestone
+    milestone.status = MilestoneStatus.SUBMITTED;
+    milestone.submittedAt = new Date();
+    milestone.deliverables = deliverables.deliverables || [];
+    
+    if (deliverables.completion_notes) {
+      milestone.feedback = deliverables.completion_notes;
+    }
+
+    await contract.save();
+
+    const reviewDeadline = new Date();
+    reviewDeadline.setDate(reviewDeadline.getDate() + 5); // 5 days review period
+
+    return {
+      success: true,
+      data: {
+        milestone_id: `milestone_${milestoneIndex}`,
+        status: 'submitted',
+        submitted_at: milestone.submittedAt.toISOString(),
+        review_deadline: reviewDeadline.toISOString()
+      }
+    };
+  }
+
+  async approveMilestone(
+    contractId: string, 
+    milestoneIndex: number, 
+    userId: string
+  ): Promise<Contract> {
+    const contract = await this.contractModel.findById(contractId);
+    
+    if (!contract) {
+      throw new NotFoundException(`Contract with ID ${contractId} not found`);
+    }
+
+    // Check if user is the client
+    if (contract.client.toString() !== userId) {
+      throw new ForbiddenException('Only the client can approve milestones');
+    }
+
+    if (milestoneIndex >= contract.milestones.length) {
+      throw new NotFoundException(`Milestone at index ${milestoneIndex} not found`);
+    }
+
+    const milestone = contract.milestones[milestoneIndex];
+    
+    if (milestone.status !== MilestoneStatus.SUBMITTED) {
+      throw new BadRequestException('Milestone must be submitted before it can be approved');
+    }
+
+    milestone.status = MilestoneStatus.APPROVED;
+    milestone.approvedAt = new Date();
+
+    const updatedContract = await contract.save();
+    await updatedContract.populate(['project', 'client', 'freelancer']);
+
+    return updatedContract;
+  }
+
+  async requestMilestoneRevision(
+    contractId: string, 
+    milestoneIndex: number, 
+    feedback: any, 
+    userId: string
+  ): Promise<Contract> {
+    const contract = await this.contractModel.findById(contractId);
+    
+    if (!contract) {
+      throw new NotFoundException(`Contract with ID ${contractId} not found`);
+    }
+
+    // Check if user is the client
+    if (contract.client.toString() !== userId) {
+      throw new ForbiddenException('Only the client can request revisions');
+    }
+
+    if (milestoneIndex >= contract.milestones.length) {
+      throw new NotFoundException(`Milestone at index ${milestoneIndex} not found`);
+    }
+
+    const milestone = contract.milestones[milestoneIndex];
+    
+    if (milestone.status !== MilestoneStatus.SUBMITTED) {
+      throw new BadRequestException('Milestone must be submitted before revision can be requested');
+    }
+
+    milestone.status = MilestoneStatus.REJECTED;
+    milestone.rejectedAt = new Date();
+    milestone.feedback = feedback.feedback || 'Revision requested';
+
+    const updatedContract = await contract.save();
+    await updatedContract.populate(['project', 'client', 'freelancer']);
+
+    return updatedContract;
+  }
+
+  async finalApproveMilestone(
+    contractId: string, 
+    milestoneIndex: number, 
+    userId: string
+  ): Promise<Contract> {
+    const contract = await this.contractModel.findById(contractId);
+    
+    if (!contract) {
+      throw new NotFoundException(`Contract with ID ${contractId} not found`);
+    }
+
+    // Check if user is the client
+    if (contract.client.toString() !== userId) {
+      throw new ForbiddenException('Only the client can finally approve milestones');
+    }
+
+    if (milestoneIndex >= contract.milestones.length) {
+      throw new NotFoundException(`Milestone at index ${milestoneIndex} not found`);
+    }
+
+    const milestone = contract.milestones[milestoneIndex];
+    
+    if (milestone.status !== MilestoneStatus.APPROVED) {
+      throw new BadRequestException('Milestone must be approved before final approval');
+    }
+
+    milestone.status = MilestoneStatus.PAID;
+    milestone.paidAt = new Date();
+    
+    // Update paid amount
+    contract.paidAmount += milestone.amount;
+
+    const updatedContract = await contract.save();
+    await updatedContract.populate(['project', 'client', 'freelancer']);
+
+    // TODO: Trigger payment processing here
+
+    return updatedContract;
+  }
+
+  async completeContract(contractId: string, userId: string): Promise<Contract> {
+    const contract = await this.contractModel.findById(contractId);
+    
+    if (!contract) {
+      throw new NotFoundException(`Contract with ID ${contractId} not found`);
+    }
+
+    // Check if user is the client
+    if (contract.client.toString() !== userId) {
+      throw new ForbiddenException('Only the client can complete contracts');
+    }
+
+    // Check if all milestones are completed
+    const allMilestonesPaid = contract.milestones.every(
+      milestone => milestone.status === MilestoneStatus.PAID
+    );
+
+    if (!allMilestonesPaid) {
+      throw new BadRequestException('All milestones must be paid before completing the contract');
+    }
+
+    contract.status = ContractStatus.COMPLETED;
+    contract.completedAt = new Date();
+
+    const updatedContract = await contract.save();
+    await updatedContract.populate(['project', 'client', 'freelancer']);
+
+    return updatedContract;
+  }
+
+  async startContract(contractId: string, userId: string): Promise<Contract> {
+    const contract = await this.contractModel.findById(contractId);
+    
+    if (!contract) {
+      throw new NotFoundException(`Contract with ID ${contractId} not found`);
+    }
+
+    // Check if user is involved in the contract
+    const isClient = contract.client.toString() === userId;
+    const isFreelancer = contract.freelancer.toString() === userId;
+
+    if (!isClient && !isFreelancer) {
+      throw new ForbiddenException('You can only start contracts you are involved in');
+    }
+
+    if (contract.status !== ContractStatus.ACTIVE) {
+      throw new BadRequestException('Contract must be active to start work');
+    }
+
+    // Set first milestone to in progress if exists
+    if (contract.milestones.length > 0) {
+      contract.milestones[0].status = MilestoneStatus.IN_PROGRESS;
+    }
+
+    const updatedContract = await contract.save();
+    await updatedContract.populate(['project', 'client', 'freelancer']);
+
+    return updatedContract;
+  }
 }

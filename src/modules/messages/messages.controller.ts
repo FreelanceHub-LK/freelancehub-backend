@@ -89,6 +89,27 @@ export class MessagesController {
     return this.messagesService.findMessages(query, req.user.id);
   }
 
+  @Get('contract/:contractId')
+  @ApiOperation({ summary: 'Get all messages for a specific contract' })
+  @ApiParam({ name: 'contractId', description: 'Contract ID' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Contract messages retrieved successfully',
+    type: [Message]
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - not authorized to view these messages' 
+  })
+  async getContractMessages(
+    @Param('contractId') contractId: string,
+    @Query() query: QueryMessageDto,
+    @Request() req: any,
+  ) {
+    query.contract = contractId;
+    return this.messagesService.findMessages(query, req.user.id);
+  }
+
   @Get('unread-count')
   @ApiOperation({ summary: 'Get unread message count for current user' })
   @ApiResponse({ 

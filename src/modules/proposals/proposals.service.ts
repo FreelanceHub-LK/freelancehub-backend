@@ -121,11 +121,11 @@ import {
         throw new NotFoundException(`Proposal with ID ${id} not found`);
       }
       
-      // Only allow updating cover letter, bid amount, and estimated days if the proposal is pending
+      // Only allow updating cover letter, proposed budget, and delivery timeline if the proposal is pending
       if (proposal.status !== ProposalStatus.PENDING && 
           (updateProposalDto.coverLetter || 
-           updateProposalDto.bidAmount !== undefined || 
-           updateProposalDto.estimatedDays !== undefined)) {
+           updateProposalDto.proposedBudget !== undefined || 
+           updateProposalDto.deliveryTimeline !== undefined)) {
         throw new BadRequestException(`Cannot update details of a ${proposal.status} proposal`);
       }
       
@@ -275,6 +275,82 @@ import {
       }
       
       return result;
+    }
+
+    async acceptProposal(proposalId: string, contractTerms: any, clientId: string): Promise<any> {
+      const proposal = await this.proposalModel
+        .findById(proposalId)
+        .populate('project')
+        .populate('freelancer');
+      
+      if (!proposal) {
+        throw new NotFoundException(`Proposal with ID ${proposalId} not found`);
+      }
+
+      // Verify the client owns the project
+      if ((proposal.project as any).client.toString() !== clientId) {
+        throw new BadRequestException('You can only accept proposals for your own projects');
+      }
+
+      if (proposal.status !== ProposalStatus.SUBMITTED && proposal.status !== ProposalStatus.PENDING) {
+        throw new BadRequestException('Proposal cannot be accepted in its current state');
+      }
+
+      // Update proposal status
+      proposal.status = ProposalStatus.ACCEPTED;
+      await proposal.save();
+
+      // Update project status
+      await this.projectModel.findByIdAndUpdate(
+        proposal.project,
+        { status: ProjectStatus.IN_PROGRESS }
+      );
+
+      // Reject all other proposals for this project
+      await this.proposalModel.updateMany(
+        {
+          project: proposal.project,
+          _id: { $ne: proposalId },
+          status: { $in: [ProposalStatus.SUBMITTED, ProposalStatus.PENDING] }
+        },
+        { status: ProposalStatus.REJECTED }
+      );
+
+      // TODO: Create contract (would need ContractsService injection)
+      const contractData = {
+        contract_id: 'contract_' + Date.now(),
+        status: 'active',
+        milestones_count: proposal.milestones?.length || 0,
+        freelancer_id: (proposal.freelancer as any)._id,
+        client_id: clientId
+      };
+
+      return {
+        success: true,
+        data: contractData
+      };
+    }
+
+    async rejectProposal(proposalId: string, clientId: string): Promise<Proposal> {
+      const proposal = await this.proposalModel
+        .findById(proposalId)
+        .populate('project');
+      
+      if (!proposal) {
+        throw new NotFoundException(`Proposal with ID ${proposalId} not found`);
+      }
+
+      // Verify the client owns the project
+      if ((proposal.project as any).client.toString() !== clientId) {
+        throw new BadRequestException('You can only reject proposals for your own projects');
+      }
+
+      if (proposal.status !== ProposalStatus.SUBMITTED && proposal.status !== ProposalStatus.PENDING) {
+        throw new BadRequestException('Proposal cannot be rejected in its current state');
+      }
+
+      proposal.status = ProposalStatus.REJECTED;
+      return await proposal.save();
     }
   }
   

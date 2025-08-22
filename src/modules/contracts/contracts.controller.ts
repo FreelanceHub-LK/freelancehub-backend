@@ -4,6 +4,7 @@ import {
   Post,
   Body,
   Patch,
+  Put,
   Param,
   Delete,
   Query,
@@ -254,5 +255,149 @@ export class ContractsController {
       updateMilestoneDto, 
       req.user.id
     );
+  }
+
+  @Post(':id/milestones/:milestoneIndex/submit')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.FREELANCER)
+  @ApiOperation({ summary: 'Submit milestone deliverables' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Milestone submitted successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        data: {
+          type: 'object',
+          properties: {
+            milestone_id: { type: 'string', example: 'milestone_101' },
+            status: { type: 'string', example: 'submitted' },
+            submitted_at: { type: 'string', example: '2025-02-15T14:30:00Z' },
+            review_deadline: { type: 'string', example: '2025-02-20T14:30:00Z' }
+          }
+        }
+      }
+    }
+  })
+  @ApiParam({ name: 'id', description: 'Contract ID' })
+  @ApiParam({ name: 'milestoneIndex', description: 'Milestone index (0-based)' })
+  async submitMilestone(
+    @Param('id') contractId: string,
+    @Param('milestoneIndex') milestoneIndex: number,
+    @Body() deliverables: any,
+    @Request() req: any,
+  ) {
+    return this.contractsService.submitMilestone(
+      contractId, 
+      Number(milestoneIndex), 
+      deliverables, 
+      req.user.id
+    );
+  }
+
+  @Patch(':id/milestones/:milestoneIndex/approve')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.CLIENT)
+  @ApiOperation({ summary: 'Approve milestone deliverables' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Milestone approved successfully',
+    type: Contract
+  })
+  @ApiParam({ name: 'id', description: 'Contract ID' })
+  @ApiParam({ name: 'milestoneIndex', description: 'Milestone index (0-based)' })
+  async approveMilestone(
+    @Param('id') contractId: string,
+    @Param('milestoneIndex') milestoneIndex: number,
+    @Request() req: any,
+  ): Promise<Contract> {
+    return this.contractsService.approveMilestone(
+      contractId, 
+      Number(milestoneIndex), 
+      req.user.id
+    );
+  }
+
+  @Patch(':id/milestones/:milestoneIndex/request-revision')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.CLIENT)
+  @ApiOperation({ summary: 'Request revision for milestone' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Revision requested successfully',
+    type: Contract
+  })
+  @ApiParam({ name: 'id', description: 'Contract ID' })
+  @ApiParam({ name: 'milestoneIndex', description: 'Milestone index (0-based)' })
+  async requestMilestoneRevision(
+    @Param('id') contractId: string,
+    @Param('milestoneIndex') milestoneIndex: number,
+    @Body() feedback: any,
+    @Request() req: any,
+  ): Promise<Contract> {
+    return this.contractsService.requestMilestoneRevision(
+      contractId, 
+      Number(milestoneIndex), 
+      feedback, 
+      req.user.id
+    );
+  }
+
+  @Patch(':id/milestones/:milestoneIndex/final-approve')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.CLIENT)
+  @ApiOperation({ summary: 'Final approval of milestone (triggers payment)' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Milestone finally approved successfully',
+    type: Contract
+  })
+  @ApiParam({ name: 'id', description: 'Contract ID' })
+  @ApiParam({ name: 'milestoneIndex', description: 'Milestone index (0-based)' })
+  async finalApproveMilestone(
+    @Param('id') contractId: string,
+    @Param('milestoneIndex') milestoneIndex: number,
+    @Request() req: any,
+  ): Promise<Contract> {
+    return this.contractsService.finalApproveMilestone(
+      contractId, 
+      Number(milestoneIndex), 
+      req.user.id
+    );
+  }
+
+  @Put(':id/complete')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.CLIENT)
+  @ApiOperation({ summary: 'Mark contract as completed' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Contract completed successfully',
+    type: Contract
+  })
+  @ApiParam({ name: 'id', description: 'Contract ID' })
+  async completeContract(
+    @Param('id') contractId: string,
+    @Request() req: any,
+  ): Promise<Contract> {
+    return this.contractsService.completeContract(contractId, req.user.id);
+  }
+
+  @Put(':id/start')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.FREELANCER, UserRole.CLIENT)
+  @ApiOperation({ summary: 'Start contract work' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Contract started successfully',
+    type: Contract
+  })
+  @ApiParam({ name: 'id', description: 'Contract ID' })
+  async startContract(
+    @Param('id') contractId: string,
+    @Request() req: any,
+  ): Promise<Contract> {
+    return this.contractsService.startContract(contractId, req.user.id);
   }
 }

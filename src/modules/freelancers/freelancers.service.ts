@@ -9,7 +9,17 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Freelancer, FreelancerDocument } from './schemas/freelancer.schema';
 import { User, UserDocument } from '../users/schemas/user.schema';
-import { CreateFreelancerDto, UpdateFreelancerDto, QueryFreelancerDto } from './dto';
+import { 
+  CreateFreelancerDto, 
+  UpdateFreelancerDto, 
+  QueryFreelancerDto,
+  UpdateSkillsDto,
+  UpdateRateDto,
+  UpdateEducationDto,
+  UpdateAvailabilityDto,
+  UpdateCertificationsDto,
+  UpdatePortfolioDto
+} from './dto';
 
 export interface FreelancerListResult {
   data: Freelancer[];
@@ -187,6 +197,115 @@ export class FreelancersService {
       }
     } catch (error) {
       this.logger.error(`Error deleting freelancer: ${error.message}`);
+      throw error;
+    }
+  }
+
+  // Specialized update methods for specific profile sections
+  async updateFreelancerSkills(id: string, updateSkillsDto: UpdateSkillsDto): Promise<Freelancer> {
+    try {
+      const freelancer = await this.freelancerModel
+        .findByIdAndUpdate(id, { skills: updateSkillsDto.skills }, { new: true })
+        .populate('userId', 'firstName lastName email profilePicture rating reviewCount')
+        .exec();
+
+      if (!freelancer) {
+        throw new NotFoundException('Freelancer not found');
+      }
+
+      return freelancer;
+    } catch (error) {
+      this.logger.error(`Error updating freelancer skills: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async updateFreelancerRate(id: string, updateRateDto: UpdateRateDto): Promise<Freelancer> {
+    try {
+      const freelancer = await this.freelancerModel
+        .findByIdAndUpdate(id, { hourlyRate: updateRateDto.hourlyRate }, { new: true })
+        .populate('userId', 'firstName lastName email profilePicture rating reviewCount')
+        .exec();
+
+      if (!freelancer) {
+        throw new NotFoundException('Freelancer not found');
+      }
+
+      return freelancer;
+    } catch (error) {
+      this.logger.error(`Error updating freelancer hourly rate: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async updateFreelancerEducation(id: string, updateEducationDto: UpdateEducationDto): Promise<Freelancer> {
+    try {
+      const freelancer = await this.freelancerModel
+        .findByIdAndUpdate(id, { education: updateEducationDto.education }, { new: true })
+        .populate('userId', 'firstName lastName email profilePicture rating reviewCount')
+        .exec();
+
+      if (!freelancer) {
+        throw new NotFoundException('Freelancer not found');
+      }
+
+      return freelancer;
+    } catch (error) {
+      this.logger.error(`Error updating freelancer education: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async updateFreelancerAvailability(id: string, updateAvailabilityDto: UpdateAvailabilityDto): Promise<Freelancer> {
+    try {
+      const freelancer = await this.freelancerModel
+        .findByIdAndUpdate(id, { isAvailable: updateAvailabilityDto.isAvailable }, { new: true })
+        .populate('userId', 'firstName lastName email profilePicture rating reviewCount')
+        .exec();
+
+      if (!freelancer) {
+        throw new NotFoundException('Freelancer not found');
+      }
+
+      return freelancer;
+    } catch (error) {
+      this.logger.error(`Error updating freelancer availability: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async updateFreelancerCertifications(id: string, updateCertificationsDto: UpdateCertificationsDto): Promise<Freelancer> {
+    try {
+      const freelancer = await this.freelancerModel
+        .findByIdAndUpdate(id, { certifications: updateCertificationsDto.certifications }, { new: true })
+        .populate('userId', 'firstName lastName email profilePicture rating reviewCount')
+        .exec();
+
+      if (!freelancer) {
+        throw new NotFoundException('Freelancer not found');
+      }
+
+      return freelancer;
+    } catch (error) {
+      this.logger.error(`Error updating freelancer certifications: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async updateFreelancerPortfolio(id: string, updatePortfolioDto: UpdatePortfolioDto): Promise<Freelancer> {
+    try {
+      const freelancer = await this.freelancerModel
+        .findByIdAndUpdate(id, { portfolioLinks: updatePortfolioDto.portfolioLinks }, { new: true })
+        .populate('userId', 'firstName lastName email profilePicture rating reviewCount')
+        .exec();
+
+      if (!freelancer) {
+        throw new NotFoundException('Freelancer not found');
+      }
+
+      return freelancer;
+    } catch (error) {
+      this.logger.error(`Error updating freelancer portfolio: ${error.message}`);
       throw error;
     }
   }

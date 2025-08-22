@@ -1,3 +1,9 @@
 export { CreateFreelancerDto } from './create-freelancer.dto';
 export { UpdateFreelancerDto } from './update-freelancer.dto';
 export { QueryFreelancerDto } from './query-freelancer.dto';
+export { UpdateSkillsDto } from './update-skills.dto';
+export { UpdateRateDto } from './update-rate.dto';
+export { UpdateEducationDto } from './update-education.dto';
+export { UpdateAvailabilityDto } from './update-availability.dto';
+export { UpdateCertificationsDto } from './update-certifications.dto';
+export { UpdatePortfolioDto } from './update-portfolio.dto';
