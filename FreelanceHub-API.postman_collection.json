@@ -2013,6 +2013,1956 @@
       ]
     },
     {
+      "name": "Proposals",
+      "item": [
+        {
+          "name": "Create Proposal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"project\": \"{{project_id}}\",\n  \"bidAmount\": 75000,\n  \"deliveryDays\": 30,\n  \"coverLetter\": \"I am excited to work on your project. I have extensive experience in web development and can deliver high-quality results.\",\n  \"attachments\": [\"portfolio_sample1.pdf\", \"portfolio_sample2.jpg\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/proposals",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "proposals"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Proposals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/proposals?page={{page}}&limit={{limit}}&status={{proposal_status}}&freelancer={{freelancer_id}}&project={{project_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "proposals"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                },
+                {
+                  "key": "status",
+                  "value": "{{proposal_status}}"
+                },
+                {
+                  "key": "freelancer",
+                  "value": "{{freelancer_id}}"
+                },
+                {
+                  "key": "project",
+                  "value": "{{project_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Proposals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/proposals/my-proposals?page={{page}}&limit={{limit}}&status={{proposal_status}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "proposals",
+                "my-proposals"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                },
+                {
+                  "key": "status",
+                  "value": "{{proposal_status}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Proposals for Project",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/proposals/project/{{project_id}}?page={{page}}&limit={{limit}}&sortBy={{sort_by}}&sortOrder={{sort_order}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "proposals",
+                "project",
+                "{{project_id}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "{{sort_by}}"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "{{sort_order}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Proposal Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/proposals/statistics",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "proposals",
+                "statistics"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Proposal by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/proposals/{{proposal_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "proposals",
+                "{{proposal_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Proposal",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bidAmount\": 80000,\n  \"deliveryDays\": 25,\n  \"coverLetter\": \"Updated proposal with better pricing and faster delivery.\",\n  \"attachments\": [\"updated_portfolio.pdf\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/proposals/{{proposal_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "proposals",
+                "{{proposal_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Accept Proposal",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Welcome aboard! Looking forward to working with you.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/proposals/{{proposal_id}}/accept",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "proposals",
+                "{{proposal_id}}",
+                "accept"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reject Proposal",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Thank you for your proposal, but we've decided to go with another freelancer.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/proposals/{{proposal_id}}/reject",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "proposals",
+                "{{proposal_id}}",
+                "reject"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Withdraw Proposal",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"I need to withdraw my proposal due to other commitments.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/proposals/{{proposal_id}}/withdraw",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "proposals",
+                "{{proposal_id}}",
+                "withdraw"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Proposal",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/proposals/{{proposal_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "proposals",
+                "{{proposal_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Freelancers",
+      "item": [
+        {
+          "name": "Create Freelancer Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Full Stack Developer\",\n  \"bio\": \"Experienced full stack developer with 5+ years in web development\",\n  \"skills\": [\"React\", \"Node.js\", \"MongoDB\", \"TypeScript\"],\n  \"hourlyRate\": 2500,\n  \"languages\": [\"English\", \"Sinhala\"],\n  \"education\": [{\n    \"degree\": \"BSc Computer Science\",\n    \"institution\": \"University of Colombo\",\n    \"year\": 2018\n  }],\n  \"experience\": [{\n    \"title\": \"Senior Developer\",\n    \"company\": \"Tech Solutions\",\n    \"duration\": \"2020-2024\",\n    \"description\": \"Led development of web applications\"\n  }],\n  \"portfolio\": [{\n    \"title\": \"E-commerce Platform\",\n    \"description\": \"Modern e-commerce solution\",\n    \"technologies\": [\"React\", \"Node.js\"],\n    \"link\": \"https://portfolio.example.com\"\n  }]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/freelancers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "freelancers"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Freelancers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/freelancers?page={{page}}&limit={{limit}}&skills={{skills}}&minRate={{min_rate}}&maxRate={{max_rate}}&rating={{min_rating}}&availability={{availability}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "freelancers"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                },
+                {
+                  "key": "skills",
+                  "value": "{{skills}}"
+                },
+                {
+                  "key": "minRate",
+                  "value": "{{min_rate}}"
+                },
+                {
+                  "key": "maxRate",
+                  "value": "{{max_rate}}"
+                },
+                {
+                  "key": "rating",
+                  "value": "{{min_rating}}"
+                },
+                {
+                  "key": "availability",
+                  "value": "{{availability}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Freelancer Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/freelancers/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "freelancers",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Freelancer Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/freelancers/dashboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "freelancers",
+                "dashboard"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Top Rated Freelancers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/freelancers/top-rated?limit={{limit}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "freelancers",
+                "top-rated"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Freelancers by Skill",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/freelancers/by-skill/{{skill_name}}?page={{page}}&limit={{limit}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "freelancers",
+                "by-skill",
+                "{{skill_name}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Freelancer by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/freelancers/{{freelancer_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "freelancers",
+                "{{freelancer_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update My Freelancer Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior Full Stack Developer\",\n  \"bio\": \"Updated bio with more experience\",\n  \"hourlyRate\": 3000,\n  \"languages\": [\"English\", \"Sinhala\", \"Tamil\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/freelancers/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "freelancers",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Freelancer Profile (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isVerified\": true,\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/freelancers/{{freelancer_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "freelancers",
+                "{{freelancer_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Skills to Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"skills\": [\"Python\", \"Django\", \"PostgreSQL\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/freelancers/me/skills",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "freelancers",
+                "me",
+                "skills"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Skill from Profile",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/freelancers/me/skills/{{skill_name}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "freelancers",
+                "me",
+                "skills",
+                "{{skill_name}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Skills",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"skills\": [\"React\", \"Vue.js\", \"Angular\", \"Node.js\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/freelancers/me/skills",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "freelancers",
+                "me",
+                "skills"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Availability",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isAvailable\": true,\n  \"availabilityNote\": \"Available for new projects starting next week\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/freelancers/me/availability",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "freelancers",
+                "me",
+                "availability"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Replace All Skills",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"skills\": [\"React\", \"Node.js\", \"TypeScript\", \"MongoDB\", \"AWS\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/freelancers/me/skills",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "freelancers",
+                "me",
+                "skills"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Clients",
+      "item": [
+        {
+          "name": "Create Client Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"Tech Innovations Ltd\",\n  \"industry\": \"Technology\",\n  \"companySize\": \"MEDIUM\",\n  \"description\": \"Leading technology company specializing in digital solutions\",\n  \"website\": \"https://techinnovations.lk\",\n  \"location\": \"Colombo, Sri Lanka\",\n  \"registrationNumber\": \"PV12345\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/clients",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Clients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients?page={{page}}&limit={{limit}}&industry={{industry}}&companySize={{company_size}}&location={{location}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                },
+                {
+                  "key": "industry",
+                  "value": "{{industry}}"
+                },
+                {
+                  "key": "companySize",
+                  "value": "{{company_size}}"
+                },
+                {
+                  "key": "location",
+                  "value": "{{location}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Client Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Top Rated Clients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients/top-rated?limit={{limit}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients",
+                "top-rated"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Clients by Industry",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients/by-industry/{{industry}}?page={{page}}&limit={{limit}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients",
+                "by-industry",
+                "{{industry}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Client by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients/{{client_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients",
+                "{{client_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update My Client Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"Updated Tech Innovations Ltd\",\n  \"description\": \"Updated company description\",\n  \"website\": \"https://updated-techinnovations.lk\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/clients/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Client Profile (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isVerified\": true,\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/clients/{{client_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients",
+                "{{client_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Completed Projects Count",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"completedProjects\": 15\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/clients/{{client_id}}/completed-projects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients",
+                "{{client_id}}",
+                "completed-projects"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Client Rating",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 4.8,\n  \"reviewCount\": 25\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/clients/{{client_id}}/rating",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients",
+                "{{client_id}}",
+                "rating"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Client",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients/{{client_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients",
+                "{{client_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectId\": \"{{project_id}}\",\n  \"revieweeId\": \"{{reviewee_user_id}}\",\n  \"rating\": 5,\n  \"comment\": \"Excellent work! Very professional and delivered on time.\",\n  \"skills\": {\n    \"communication\": 5,\n    \"quality\": 5,\n    \"timeliness\": 5,\n    \"professionalism\": 5\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Reviews",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reviews?page={{page}}&limit={{limit}}&rating={{min_rating}}&reviewerId={{reviewer_id}}&revieweeId={{reviewee_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                },
+                {
+                  "key": "rating",
+                  "value": "{{min_rating}}"
+                },
+                {
+                  "key": "reviewerId",
+                  "value": "{{reviewer_id}}"
+                },
+                {
+                  "key": "revieweeId",
+                  "value": "{{reviewee_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Review Statistics for User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reviews/stats/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews",
+                "stats",
+                "{{user_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Reviews for User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reviews/user/{{user_id}}?page={{page}}&limit={{limit}}&rating={{min_rating}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews",
+                "user",
+                "{{user_id}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                },
+                {
+                  "key": "rating",
+                  "value": "{{min_rating}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Reviews for Project",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reviews/project/{{project_id}}?page={{page}}&limit={{limit}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews",
+                "project",
+                "{{project_id}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Review by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reviews/{{review_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews",
+                "{{review_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Review",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 4,\n  \"comment\": \"Updated review: Good work overall with minor improvements needed.\",\n  \"skills\": {\n    \"communication\": 4,\n    \"quality\": 4,\n    \"timeliness\": 5,\n    \"professionalism\": 4\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews/{{review_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews",
+                "{{review_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Respond to Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"response\": \"Thank you for the positive feedback! It was a pleasure working with you.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews/{{review_id}}/respond",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews",
+                "{{review_id}}",
+                "respond"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Review (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reviews/{{review_id}}/verify",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews",
+                "{{review_id}}",
+                "verify"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Flag Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"INAPPROPRIATE_CONTENT\",\n  \"description\": \"This review contains inappropriate language\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews/{{review_id}}/flag",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews",
+                "{{review_id}}",
+                "flag"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Review",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reviews/{{review_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews",
+                "{{review_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Bulk Import Reviews (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"projectId\": \"{{project_id}}\",\n    \"reviewerId\": \"{{reviewer_id}}\",\n    \"revieweeId\": \"{{reviewee_id}}\",\n    \"rating\": 5,\n    \"comment\": \"Excellent work!\"\n  },\n  {\n    \"projectId\": \"{{project_id_2}}\",\n    \"reviewerId\": \"{{reviewer_id_2}}\",\n    \"revieweeId\": \"{{reviewee_id_2}}\",\n    \"rating\": 4,\n    \"comment\": \"Good quality work\"\n  }\n]"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews/bulk-import",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews",
+                "bulk-import"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Disputes",
+      "item": [
+        {
+          "name": "Create Dispute",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Quality Issues with Delivered Work\",\n  \"description\": \"The delivered work does not meet the requirements specified in the contract\",\n  \"type\": \"QUALITY_ISSUE\",\n  \"contractId\": \"{{contract_id}}\",\n  \"amount\": 50000,\n  \"evidence\": [\"screenshot1.jpg\", \"requirements_doc.pdf\"],\n  \"desiredResolution\": \"Full refund or rework of the project\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/disputes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "disputes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Disputes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/disputes?page={{page}}&limit={{limit}}&status={{dispute_status}}&type={{dispute_type}}&contractId={{contract_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "disputes"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                },
+                {
+                  "key": "status",
+                  "value": "{{dispute_status}}"
+                },
+                {
+                  "key": "type",
+                  "value": "{{dispute_type}}"
+                },
+                {
+                  "key": "contractId",
+                  "value": "{{contract_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dispute Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/disputes/statistics?userId={{user_id}}&startDate={{start_date}}&endDate={{end_date}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "disputes",
+                "statistics"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{user_id}}"
+                },
+                {
+                  "key": "startDate",
+                  "value": "{{start_date}}"
+                },
+                {
+                  "key": "endDate",
+                  "value": "{{end_date}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dispute by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/disputes/{{dispute_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "disputes",
+                "{{dispute_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Dispute",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated description with more details\",\n  \"evidence\": [\"screenshot1.jpg\", \"requirements_doc.pdf\", \"additional_evidence.pdf\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/disputes/{{dispute_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "disputes",
+                "{{dispute_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Dispute Response",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"I believe the work was delivered according to specifications. Here's my evidence.\",\n  \"evidence\": [\"work_samples.zip\", \"communication_log.pdf\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/disputes/{{dispute_id}}/responses",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "disputes",
+                "{{dispute_id}}",
+                "responses"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Escalate Dispute",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Unable to reach agreement through direct communication\",\n  \"priority\": \"HIGH\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/disputes/{{dispute_id}}/escalate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "disputes",
+                "{{dispute_id}}",
+                "escalate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Resolve Dispute (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resolution\": \"PARTIAL_REFUND\",\n  \"refundAmount\": 25000,\n  \"reasoning\": \"Based on evidence, partial work was completed satisfactorily\",\n  \"notes\": \"Both parties should communicate requirements more clearly in future projects\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/disputes/{{dispute_id}}/resolve",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "disputes",
+                "{{dispute_id}}",
+                "resolve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Assign Moderator (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"moderatorId\": \"{{moderator_user_id}}\",\n  \"priority\": \"HIGH\",\n  \"notes\": \"Complex dispute requiring experienced moderator\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/disputes/{{dispute_id}}/assign-moderator",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "disputes",
+                "{{dispute_id}}",
+                "assign-moderator"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Contract Milestones",
+      "item": [
+        {
+          "name": "Update Milestone",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Milestone Title\",\n  \"description\": \"Updated milestone description\",\n  \"amount\": 60000,\n  \"dueDate\": \"2024-10-15T00:00:00.000Z\",\n  \"status\": \"IN_PROGRESS\",\n  \"deliverables\": [\"Updated deliverable 1\", \"Updated deliverable 2\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/contracts/{{contract_id}}/milestones/{{milestone_index}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contracts",
+                "{{contract_id}}",
+                "milestones",
+                "{{milestone_index}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Conversations",
+      "item": [
+        {
+          "name": "Create Conversation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"participants\": [\"{{user_id_1}}\", \"{{user_id_2}}\"],\n  \"title\": \"Project Discussion\",\n  \"type\": \"DIRECT\",\n  \"projectId\": \"{{project_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/conversations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                "conversations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/messages/conversations?page={{page}}&limit={{limit}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                "conversations"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Conversation by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/messages/conversations/{{conversation_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                "conversations",
+                "{{conversation_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Conversation as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/messages/conversations/{{conversation_id}}/read",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                "conversations",
+                "{{conversation_id}}",
+                "read"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "App Info",
       "item": [
         {
@@ -2238,6 +4188,136 @@
     },
     {
       "key": "milestone_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "milestone_index",
+      "value": "0",
+      "type": "string"
+    },
+    {
+      "key": "proposal_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "proposal_status",
+      "value": "PENDING",
+      "type": "string"
+    },
+    {
+      "key": "review_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reviewee_user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reviewer_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reviewee_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "min_rating",
+      "value": "4",
+      "type": "string"
+    },
+    {
+      "key": "dispute_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "dispute_status",
+      "value": "OPEN",
+      "type": "string"
+    },
+    {
+      "key": "dispute_type",
+      "value": "QUALITY_ISSUE",
+      "type": "string"
+    },
+    {
+      "key": "moderator_user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "skills",
+      "value": "React,Node.js",
+      "type": "string"
+    },
+    {
+      "key": "min_rate",
+      "value": "1000",
+      "type": "string"
+    },
+    {
+      "key": "max_rate",
+      "value": "5000",
+      "type": "string"
+    },
+    {
+      "key": "availability",
+      "value": "AVAILABLE",
+      "type": "string"
+    },
+    {
+      "key": "industry",
+      "value": "Technology",
+      "type": "string"
+    },
+    {
+      "key": "company_size",
+      "value": "MEDIUM",
+      "type": "string"
+    },
+    {
+      "key": "location",
+      "value": "Colombo",
+      "type": "string"
+    },
+    {
+      "key": "sort_by",
+      "value": "createdAt",
+      "type": "string"
+    },
+    {
+      "key": "sort_order",
+      "value": "desc",
+      "type": "string"
+    },
+    {
+      "key": "user_id_1",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id_2",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "project_id_2",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reviewer_id_2",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reviewee_id_2",
       "value": "",
       "type": "string"
     }
