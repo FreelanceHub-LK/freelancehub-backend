@@ -15,8 +15,19 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<User> {
+    console.log('UsersService.findOne called with ID:', id);
+    console.log('ID type:', typeof id);
+    console.log('ID length:', id?.length);
+    
+    // Debug: Check if there are any users in the database
+    const allUsers = await this.userModel.find().limit(5).exec();
+    console.log('Sample users in database:', allUsers.map(u => ({ id: u._id, email: u.email })));
+    
     const user = await this.userModel.findById(id).exec();
+    console.log('Database query result:', user ? 'User found' : 'User not found');
+    
     if (!user) {
+      console.log('Throwing NotFoundException for user ID:', id);
       throw new NotFoundException(`User with ID ${id} not found`);
     }
     return user;

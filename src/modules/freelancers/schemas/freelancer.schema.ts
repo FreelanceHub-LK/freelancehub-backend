@@ -4,7 +4,7 @@ import { Document, Schema as MongooseSchema } from 'mongoose';
 export type FreelancerDocument = Freelancer & Document;
 
 @Schema({ timestamps: true })
-export class Freelancer extends Document {
+export class Freelancer {
   @Prop({
     type: MongooseSchema.Types.ObjectId,
     ref: 'User',

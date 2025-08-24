@@ -16,7 +16,7 @@ export enum UserStatus {
 export type UserDocument = User & Document;
 
 @Schema({ timestamps: true })
-export class User extends Document {
+export class User {
   @Prop({ required: true })
   firstName: string;
 

@@ -13,7 +13,7 @@ import type {
   AuthenticationResponseJSON,
 } from '@simplewebauthn/types';
 import { Passkey, PasskeyDocument } from '../schemas/passkey.schema';
-import { User } from '../../users/schemas/user.schema';
+import { User, UserDocument } from '../../users/schemas/user.schema';
 import { UsersService } from '../../users/users.service';
 
 @Injectable()
@@ -29,7 +29,7 @@ export class PasskeyService {
   ) {
     this.rpName = this.configService.get<string>('WEBAUTHN_RP_NAME') || 'FreelanceHub';
     this.rpID = this.configService.get<string>('WEBAUTHN_RP_ID') || 'localhost';
-    this.origin = this.configService.get<string>('WEBAUTHN_ORIGIN') || 'http://localhost:3000';
+    this.origin = this.configService.get<string>('WEBAUTHN_ORIGIN') || this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
   }
 
   async generateRegistrationOptions(userId: string, deviceName?: string) {
@@ -65,6 +65,15 @@ export class PasskeyService {
       supportedAlgorithmIDs: [-7, -257], // ES256 and RS256
     });
 
+    // Log options for debugging
+    console.log('Generated passkey registration options:', {
+      challengeType: typeof options.challenge,
+      challengeLength: (options.challenge as string).length,
+      rpName: options.rp.name,
+      rpID: options.rp.id,
+      userName: options.user.name,
+    });
+
     return options;
   }
 
@@ -81,12 +90,24 @@ export class PasskeyService {
     }
 
     try {
+      console.log('Verifying passkey registration response:', {
+        credentialId: response.id,
+        challenge: challenge.substring(0, 20) + '...',
+        origin: this.origin,
+        rpID: this.rpID,
+      });
+
       const verification = await verifyRegistrationResponse({
         response,
         expectedChallenge: challenge,
         expectedOrigin: this.origin,
         expectedRPID: this.rpID,
         requireUserVerification: false,
+      });
+
+      console.log('Verification result:', {
+        verified: verification.verified,
+        hasRegistrationInfo: !!verification.registrationInfo,
       });
 
       if (!verification.verified || !verification.registrationInfo) {
@@ -130,6 +151,12 @@ export class PasskeyService {
         deviceName: passkey.deviceName,
       };
     } catch (error) {
+      console.error('Passkey registration error:', {
+        error: error.message,
+        stack: error.stack,
+        userId,
+        responseId: response.id,
+      });
       throw new BadRequestException(`Passkey registration failed: ${error.message}`);
     }
   }
@@ -141,8 +168,9 @@ export class PasskeyService {
     }
 
     // Get user's passkeys
+    const userId = (user as any)._id?.toString() || (user as any).id;
     const userPasskeys = await this.passkeyModel.find({
-      userId: user._id,
+      userId: userId,
       isActive: true,
     }).exec();
 
@@ -174,8 +202,9 @@ export class PasskeyService {
       throw new NotFoundException('User not found');
     }
 
+    const userId = (user as any)._id?.toString() || (user as any).id;
     const passkey = await this.passkeyModel.findOne({
-      userId: user._id,
+      userId: userId,
       credentialId: response.id,
       isActive: true,
     });

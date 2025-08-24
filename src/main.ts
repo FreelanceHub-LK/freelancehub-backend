@@ -30,14 +30,17 @@ async function bootstrap() {
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        'connect-src': ["'self'", 'https:'],
+        'connect-src': ["'self'", 'https:', 'http://localhost:3000'],
       },
     },
   }));
+  
+  const frontendUrl = configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
   app.enableCors({
-    origin: '*',
+    origin: [frontendUrl, 'http://localhost:3000', 'http://localhost:3001'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true,
+    credentials: true, // Required for session support
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
 
   const config = new DocumentBuilder()
@@ -57,7 +60,7 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   const port = configService.get<number>('PORT', 8000);
-  await app.listen(port);
-  console.log(`Application is running on: ${await app.getUrl()}`);
+  await app.listen(port, '0.0.0.0'); // Listen on all interfaces
+  console.log(`Application is running on: http://localhost:${port}`);
 }
 bootstrap();

@@ -54,10 +54,15 @@ export class PasskeyController {
     @Session() session: Record<string, any>,
   ) {
     const userId = req.user?.['id'];
+    console.log('Full user object from JWT:', req.user);
+    console.log('Extracted userId:', userId);
+    console.log('UserId type:', typeof userId);
+    
     if (!userId) {
       throw new BadRequestException('User not authenticated');
     }
 
+    console.log('Initiating passkey registration for user:', userId);
     const options = await this.passkeyService.generateRegistrationOptions(
       userId,
       dto.deviceName,

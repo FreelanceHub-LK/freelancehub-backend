@@ -10,7 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
-import { User } from '../users/schemas/user.schema';
+import { User, UserDocument } from '../users/schemas/user.schema';
 import { EmailService } from '../email/email.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -33,7 +33,16 @@ export class AuthService {
     if (user && user.password) {
       const isPasswordMatch = await bcrypt.compare(password, user.password);
       if (isPasswordMatch) {
-        const { password, ...result } = user.toObject();
+        // Safely convert to plain object to avoid circular references
+        let userObj: any;
+        if (user && typeof (user as any).toObject === 'function') {
+          userObj = (user as any).toObject();
+        } else if (user && typeof (user as any).toJSON === 'function') {
+          userObj = (user as any).toJSON();
+        } else {
+          userObj = user;
+        }
+        const { password, ...result } = userObj;
         return result;
       }
     }
@@ -78,7 +87,8 @@ export class AuthService {
         emailVerified: true,
       });
     } else if (!user.googleId) {
-      user = await this.usersService.update(user.id, {
+      const userId = (user as any)._id?.toString() || (user as any).id;
+      user = await this.usersService.update(userId, {
         googleId: req.user.googleId,
         emailVerified: true,
       });
@@ -105,7 +115,8 @@ export class AuthService {
         emailVerified: true,
       });
     } else if (!user.googleId) {
-      user = await this.usersService.update(user.id, {
+      const userId = (user as any)._id?.toString() || (user as any).id;
+      user = await this.usersService.update(userId, {
         googleId: googleUser.googleId,
         emailVerified: true,
       });
@@ -124,10 +135,20 @@ export class AuthService {
   }
 
   public generateAuthResponse(user: User | any): AuthResponseDto {
+    // Ensure we have a plain object to avoid circular references
+    let userObj: any;
+    if (user && typeof (user as any).toObject === 'function') {
+      userObj = (user as any).toObject();
+    } else if (user && typeof (user as any).toJSON === 'function') {
+      userObj = (user as any).toJSON();
+    } else {
+      userObj = user;
+    }
+
     const payload = {
-      email: user.email,
-      sub: user._id || user.id,
-      role: user.role,
+      email: userObj.email,
+      sub: userObj._id || userObj.id,
+      role: userObj.role,
     };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -141,15 +162,15 @@ export class AuthService {
     });
 
     return new AuthResponseDto({
-      id: user._id || user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      profilePicture: user.profilePicture,
+      id: userObj._id || userObj.id,
+      name: userObj.name || `${userObj.firstName} ${userObj.lastName}`,
+      email: userObj.email,
+      role: userObj.role,
+      profilePicture: userObj.profilePicture,
       accessToken,
       refreshToken,
-      passkeyEnabled: user.passkeyEnabled || false,
-      passkeyCount: user.passkeyCount || 0,
+      passkeyEnabled: userObj.passkeyEnabled || false,
+      passkeyCount: userObj.passkeyCount || 0,
     });
   }
 
@@ -265,7 +286,8 @@ export class AuthService {
     // Update user email verification status
     const user = await this.usersService.findByEmail(normalizedEmail);
     if (user) {
-      await this.usersService.update(user.id, { emailVerified: true });
+      const userId = (user as any)._id?.toString() || (user as any).id;
+      await this.usersService.update(userId, { emailVerified: true });
     }
 
     return { message: 'Email verified successfully' };

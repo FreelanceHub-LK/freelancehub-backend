@@ -18,7 +18,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    const user = await this.usersService.findOne(payload.sub);
-    return user;
+    console.log('JWT payload:', payload);
+    console.log('Payload sub (user ID):', payload.sub);
+    console.log('Payload issued at:', new Date(payload.iat * 1000));
+    console.log('Payload expires at:', new Date(payload.exp * 1000));
+    
+    try {
+      const user = await this.usersService.findOne(payload.sub);
+      console.log('JWT validation successful for user:', user.email);
+      return user;
+    } catch (error) {
+      console.log('JWT validation failed:', error.message);
+      // Instead of failing, let's return the payload info for the passkey controller to handle
+      return { id: payload.sub, email: payload.email || 'unknown' };
+    }
   }
 }

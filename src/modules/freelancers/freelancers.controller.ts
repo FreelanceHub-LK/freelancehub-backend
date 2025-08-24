@@ -16,6 +16,7 @@ import {
   Logger,
   Request,
   ParseArrayPipe,
+  NotFoundException,
 } from '@nestjs/common';
 import { 
   ApiTags, 
@@ -86,6 +87,45 @@ export class FreelancersController {
     }
     
     return this.freelancersService.create(createFreelancerDto);
+  }
+
+  @Post('create-or-get')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.FREELANCER, UserRole.ADMIN)
+  @ApiOperation({ summary: 'Create freelancer profile or return existing one' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Freelancer profile created or retrieved successfully',
+    type: Freelancer
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - validation failed' 
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized' 
+  })
+  async createOrGet(
+    @Body() createFreelancerDto: CreateFreelancerDto,
+    @Request() req: any,
+  ): Promise<Freelancer> {
+    // If not admin, ensure user can only create their own profile
+    if (req.user.role !== UserRole.ADMIN) {
+      createFreelancerDto.userId = req.user.id;
+    }
+    
+    // Try to find existing freelancer first
+    try {
+      return await this.freelancersService.findOneByUserId(createFreelancerDto.userId);
+    } catch (error) {
+      // If not found, create new one
+      if (error instanceof NotFoundException) {
+        return await this.freelancersService.create(createFreelancerDto);
+      }
+      throw error;
+    }
   }
 
   @Get()

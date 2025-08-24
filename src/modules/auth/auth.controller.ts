@@ -184,10 +184,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Logout successful' })
   @UseGuards(JwtAuthGuard)
   async logout(@Res() res: Response) {
-    // In a stateless JWT auth system, logout is typically handled on the client side
-    // by removing the token from storage
-    // This endpoint is mostly for API consistency
-
+   
     return res.status(HttpStatus.OK).json({
       message: 'Logout successful',
     });

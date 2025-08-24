@@ -55,7 +55,9 @@ export class FreelancersService {
         userId: createFreelancerDto.userId 
       });
       if (existingFreelancer) {
-        throw new ConflictException('Freelancer profile already exists for this user');
+        // Instead of throwing an error, return the existing freelancer profile
+        this.logger.warn(`Freelancer profile already exists for user ${createFreelancerDto.userId}, returning existing profile`);
+        return await this.findOneByIdWithUser(String(existingFreelancer._id));
       }
 
       const freelancer = new this.freelancerModel({
@@ -67,6 +69,24 @@ export class FreelancersService {
       return await this.findOneByIdWithUser(String(savedFreelancer._id));
     } catch (error) {
       this.logger.error(`Error creating freelancer: ${error.message}`);
+      
+      // Handle MongoDB duplicate key error specifically
+      if (error.code === 11000) {
+        // Try to find and return the existing freelancer
+        try {
+          const existingFreelancer = await this.freelancerModel.findOne({ 
+            userId: createFreelancerDto.userId 
+          });
+          if (existingFreelancer) {
+            this.logger.warn(`Duplicate key error resolved by returning existing freelancer for user ${createFreelancerDto.userId}`);
+            return await this.findOneByIdWithUser(String(existingFreelancer._id));
+          }
+        } catch (findError) {
+          this.logger.error(`Error finding existing freelancer after duplicate key error: ${findError.message}`);
+        }
+        throw new ConflictException('Freelancer profile already exists for this user');
+      }
+      
       throw error;
     }
   }
@@ -121,13 +141,13 @@ export class FreelancersService {
 
     try {
       const [freelancers, total] = await Promise.all([
-        this.freelancerModel
-          .find(query)
-          .populate('userId', 'firstName lastName email profilePicture rating reviewCount')
-          .sort(sortOptions)
-          .skip(skip)
-          .limit(limit)
-          .exec(),
+        this.populateUserSafely(
+          this.freelancerModel
+            .find(query)
+            .sort(sortOptions)
+            .skip(skip)
+            .limit(limit)
+        ).exec(),
         this.freelancerModel.countDocuments(query)
       ]);
 
@@ -150,16 +170,15 @@ export class FreelancersService {
 
   async findOneByUserId(userId: string): Promise<Freelancer> {
     try {
-      const freelancer = await this.freelancerModel
-        .findOne({ userId })
-        .populate('userId', 'firstName lastName email profilePicture rating reviewCount')
-        .exec();
+      const freelancer = await this.populateUserSafely(
+        this.freelancerModel.findOne({ userId })
+      ).exec();
 
       if (!freelancer) {
         throw new NotFoundException('Freelancer profile not found');
       }
 
-      return freelancer;
+      return freelancer as any;
     } catch (error) {
       this.logger.error(`Error finding freelancer by user ID: ${error.message}`);
       throw error;
@@ -445,17 +464,31 @@ export class FreelancersService {
     try {
       const freelancer = await this.freelancerModel
         .findById(id)
-        .populate('userId', 'firstName lastName email profilePicture rating reviewCount')
+        .populate({
+          path: 'userId',
+          select: 'firstName lastName email profilePicture rating reviewCount',
+          options: { lean: true } // Use lean to avoid circular references
+        })
+        .lean() // Make the freelancer object lean too
         .exec();
 
       if (!freelancer) {
         throw new NotFoundException('Freelancer not found');
       }
 
-      return freelancer;
+      return freelancer as any;
     } catch (error) {
       this.logger.error(`Error finding freelancer: ${error.message}`);
       throw error;
     }
+  }
+
+  // Helper method to safely populate user data without circular references
+  private populateUserSafely(query: any) {
+    return query.populate({
+      path: 'userId',
+      select: 'firstName lastName email profilePicture rating reviewCount',
+      options: { lean: true }
+    }).lean();
   }
 }
