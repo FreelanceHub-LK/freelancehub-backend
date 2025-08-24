@@ -65,15 +65,6 @@ export class PasskeyService {
       supportedAlgorithmIDs: [-7, -257], // ES256 and RS256
     });
 
-    // Log options for debugging
-    console.log('Generated passkey registration options:', {
-      challengeType: typeof options.challenge,
-      challengeLength: (options.challenge as string).length,
-      rpName: options.rp.name,
-      rpID: options.rp.id,
-      userName: options.user.name,
-    });
-
     return options;
   }
 
@@ -90,24 +81,12 @@ export class PasskeyService {
     }
 
     try {
-      console.log('Verifying passkey registration response:', {
-        credentialId: response.id,
-        challenge: challenge.substring(0, 20) + '...',
-        origin: this.origin,
-        rpID: this.rpID,
-      });
-
       const verification = await verifyRegistrationResponse({
         response,
         expectedChallenge: challenge,
         expectedOrigin: this.origin,
         expectedRPID: this.rpID,
         requireUserVerification: false,
-      });
-
-      console.log('Verification result:', {
-        verified: verification.verified,
-        hasRegistrationInfo: !!verification.registrationInfo,
       });
 
       if (!verification.verified || !verification.registrationInfo) {
@@ -151,12 +130,6 @@ export class PasskeyService {
         deviceName: passkey.deviceName,
       };
     } catch (error) {
-      console.error('Passkey registration error:', {
-        error: error.message,
-        stack: error.stack,
-        userId,
-        responseId: response.id,
-      });
       throw new BadRequestException(`Passkey registration failed: ${error.message}`);
     }
   }

@@ -232,10 +232,6 @@ export class AuthService {
     const normalizedEmail = email.toLowerCase().trim();
     const trimmedOtp = otp.trim();
 
-    // Add debugging logs
-    console.log('Verifying OTP for:', { email: normalizedEmail, otpLength: trimmedOtp.length });
-    console.log('Current time:', new Date());
-
     // Find all valid OTP records for this email (not expired and not used)
     const validOtpRecords = await this.otpModel.find({
       email: normalizedEmail,
@@ -261,12 +257,9 @@ export class AuthService {
     if (!matchingOtpRecord) {
       // Additional debugging - check if any records exist for this email
       const allRecords = await this.otpModel.find({ email: normalizedEmail }).sort({ createdAt: -1 });
-      console.log(`Total OTP records for email: ${allRecords.length}`);
       
       if (allRecords.length > 0) {
         const latestRecord = allRecords[0];
-        console.log('Latest record expires at:', latestRecord.expiresAt);
-        console.log('Latest record is used:', latestRecord.isUsed);
         
         if (latestRecord.expiresAt <= new Date()) {
           throw new UnauthorizedException('OTP has expired');
