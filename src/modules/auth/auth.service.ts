@@ -157,46 +157,113 @@ export class AuthService {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
+  async cleanupExpiredOtps(): Promise<void> {
+    await this.otpModel.deleteMany({
+      expiresAt: { $lt: new Date() }
+    });
+  }
+
   async sendOtp(sendOtpDto: SendOtpDto): Promise<{ message: string }> {
     const { email } = sendOtpDto;
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Clean up any expired OTPs
+    await this.cleanupExpiredOtps();
+
+    // Also clean up any existing unused OTPs for this email to prevent spam
+    await this.otpModel.deleteMany({
+      email: normalizedEmail,
+      isUsed: false
+    });
 
     const otp = await this.generateOtp();
+    
+    // Hash the OTP before storing it in the database
+    const saltRounds = 10;
+    const hashedOtp = await bcrypt.hash(otp, saltRounds);
 
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 10);
 
-    await this.otpModel.create({
-      email,
-      otp,
+    console.log('Creating OTP record:', {
+      email: normalizedEmail,
+      otpLength: otp.length,
+      expiresAt,
+    });
+
+    const otpRecord = await this.otpModel.create({
+      email: normalizedEmail,
+      otp: hashedOtp, // Store the hashed OTP
       expiresAt,
       isUsed: false,
     });
 
+    console.log('OTP record created with hashed OTP');
 
-    await this.emailService.sendOtpEmail(email, otp);
+    // Send the plain OTP via email (not the hashed one)
+    await this.emailService.sendOtpEmail(normalizedEmail, otp);
 
     return { message: 'OTP sent successfully' };
   }
 
   async verifyOtp(verifyOtpDto: VerifyOtpDto): Promise<{ message: string }> {
     const { email, otp } = verifyOtpDto;
+    const normalizedEmail = email.toLowerCase().trim();
+    const trimmedOtp = otp.trim();
 
-    const otpRecord = await this.otpModel
-      .findOne({
-        email,
-        otp,
-        expiresAt: { $gt: new Date() },
-        isUsed: false,
-      })
-      .sort({ createdAt: -1 });
+    // Add debugging logs
+    console.log('Verifying OTP for:', { email: normalizedEmail, otpLength: trimmedOtp.length });
+    console.log('Current time:', new Date());
 
-    if (!otpRecord) {
-      throw new UnauthorizedException('Invalid or expired OTP');
+    // Find all valid OTP records for this email (not expired and not used)
+    const validOtpRecords = await this.otpModel.find({
+      email: normalizedEmail,
+      expiresAt: { $gt: new Date() },
+      isUsed: false,
+    }).sort({ createdAt: -1 });
+
+    console.log(`Found ${validOtpRecords.length} valid OTP records for email`);
+
+    let matchingOtpRecord: any = null;
+
+    // Check each valid OTP record to see if the provided OTP matches
+    for (const record of validOtpRecords) {
+      const isMatch = await bcrypt.compare(trimmedOtp, record.otp);
+      if (isMatch) {
+        matchingOtpRecord = record;
+        break;
+      }
     }
 
-    otpRecord.isUsed = true;
-    await otpRecord.save();
-    const user = await this.usersService.findByEmail(email);
+    console.log('Matching OTP Record found:', !!matchingOtpRecord);
+
+    if (!matchingOtpRecord) {
+      // Additional debugging - check if any records exist for this email
+      const allRecords = await this.otpModel.find({ email: normalizedEmail }).sort({ createdAt: -1 });
+      console.log(`Total OTP records for email: ${allRecords.length}`);
+      
+      if (allRecords.length > 0) {
+        const latestRecord = allRecords[0];
+        console.log('Latest record expires at:', latestRecord.expiresAt);
+        console.log('Latest record is used:', latestRecord.isUsed);
+        
+        if (latestRecord.expiresAt <= new Date()) {
+          throw new UnauthorizedException('OTP has expired');
+        }
+        if (latestRecord.isUsed) {
+          throw new UnauthorizedException('OTP has already been used');
+        }
+      }
+      
+      throw new UnauthorizedException('Invalid OTP');
+    }
+
+    // Mark the OTP as used
+    matchingOtpRecord.isUsed = true;
+    await matchingOtpRecord.save();
+    
+    // Update user email verification status
+    const user = await this.usersService.findByEmail(normalizedEmail);
     if (user) {
       await this.usersService.update(user.id, { emailVerified: true });
     }
