@@ -41,6 +41,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/schemas/user.schema';
+import { ValidationUtil } from '../../common/utils/validation.util';
 
 @ApiTags('contracts')
 @Controller('contracts')
@@ -147,6 +148,9 @@ export class ContractsController {
     @Param('id') id: string,
     @Request() req: any,
   ): Promise<Contract> {
+    // Validate ObjectId format before proceeding
+    ValidationUtil.validateObjectId(id, 'Contract ID');
+    
     return this.contractsService.findOne(id, req.user.id);
   }
 
@@ -178,6 +182,9 @@ export class ContractsController {
     @Request() req: any,
     @Res() res: Response,
   ): Promise<void> {
+    // Validate ObjectId format before proceeding
+    ValidationUtil.validateObjectId(id, 'Contract ID');
+    
     try {
       // Get the full contract data with populated fields
       const contractData = await this.contractsService.findOneForPdf(id, req.user.id);
@@ -228,6 +235,9 @@ export class ContractsController {
     @Body() updateContractDto: UpdateContractDto,
     @Request() req: any,
   ): Promise<Contract> {
+    // Validate ObjectId format before proceeding
+    ValidationUtil.validateObjectId(id, 'Contract ID');
+    
     return this.contractsService.update(id, updateContractDto, req.user.id);
   }
 
@@ -251,6 +261,9 @@ export class ContractsController {
     @Param('id') id: string,
     @Request() req: any,
   ): Promise<void> {
+    // Validate ObjectId format before proceeding
+    ValidationUtil.validateObjectId(id, 'Contract ID');
+    
     return this.contractsService.remove(id, req.user.id);
   }
 
@@ -281,6 +294,9 @@ export class ContractsController {
     @Ip() ip: string,
     @Headers('user-agent') userAgent: string,
   ): Promise<Contract> {
+    // Validate ObjectId format before proceeding
+    ValidationUtil.validateObjectId(id, 'Contract ID');
+    
     const signatureData = {
       ipAddress: ip,
       userAgent: userAgent || 'Unknown',

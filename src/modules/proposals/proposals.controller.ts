@@ -32,6 +32,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/schemas/user.schema';
 import { GetCurrentUser } from '../auth/decorators/get-current-user.decorator';
+import { ValidationUtil } from '../../common/utils/validation.util';
 
 @ApiTags('proposals')
 @Controller('proposals')
@@ -145,6 +146,9 @@ export class ProposalsController {
     @Request() req: any,
     @Query() queryDto: QueryProposalDto,
   ) {
+    // Validate ObjectId format before proceeding
+    ValidationUtil.validateObjectId(projectId, 'Project ID');
+    
     // Only project owner (client) or admin can see all proposals for a project
     // This validation should ideally be done in the service with project ownership check
     queryDto.project = projectId;
@@ -179,6 +183,9 @@ export class ProposalsController {
     @Param('id') id: string,
     @Request() req: any,
   ): Promise<Proposal> {
+    // Validate ObjectId format before proceeding
+    ValidationUtil.validateObjectId(id, 'Proposal ID');
+    
     const proposal = await this.proposalsService.findOne(id);
     
     // Check if user has permission to view this proposal
@@ -220,6 +227,9 @@ export class ProposalsController {
     @Body() updateProposalDto: UpdateProposalDto,
     @Request() req: any,
   ): Promise<Proposal> {
+    // Validate ObjectId format before proceeding
+    ValidationUtil.validateObjectId(id, 'Proposal ID');
+    
     // Check if user owns the proposal
     const proposal = await this.proposalsService.findOne(id);
     if ((proposal as any).freelancer._id.toString() !== req.user.id) {
@@ -263,6 +273,9 @@ export class ProposalsController {
     @Body() contractTerms: any,
     @Request() req: any,
   ) {
+    // Validate ObjectId format before proceeding
+    ValidationUtil.validateObjectId(id, 'Proposal ID');
+    
     return this.proposalsService.acceptProposal(id, contractTerms, req.user.id);
   }
 
@@ -284,6 +297,9 @@ export class ProposalsController {
     @Param('id') id: string,
     @Request() req: any,
   ): Promise<Proposal> {
+    // Validate ObjectId format before proceeding
+    ValidationUtil.validateObjectId(id, 'Proposal ID');
+    
     return this.proposalsService.rejectProposal(id, req.user.id);
   }
 
@@ -305,6 +321,9 @@ export class ProposalsController {
     @Param('id') id: string,
     @Request() req: any,
   ): Promise<Proposal> {
+    // Validate ObjectId format before proceeding
+    ValidationUtil.validateObjectId(id, 'Proposal ID');
+    
     // Check if user owns the proposal
     const proposal = await this.proposalsService.findOne(id);
     if ((proposal as any).freelancer._id.toString() !== req.user.id) {
@@ -336,6 +355,9 @@ export class ProposalsController {
     @Param('id') id: string,
     @Request() req: any,
   ) {
+    // Validate ObjectId format before proceeding
+    ValidationUtil.validateObjectId(id, 'Proposal ID');
+    
     // For freelancers, check if they own the proposal
     if (req.user.role === UserRole.FREELANCER) {
       const proposal = await this.proposalsService.findOne(id);

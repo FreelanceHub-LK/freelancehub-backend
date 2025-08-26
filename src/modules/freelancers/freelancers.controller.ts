@@ -49,7 +49,7 @@ import { GetCurrentUser } from '../auth/decorators/get-current-user.decorator';
 @Controller('freelancers')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
-@UseInterceptors(ClassSerializerInterceptor)
+// @UseInterceptors(ClassSerializerInterceptor) // Temporarily disabled to prevent circular reference issues
 export class FreelancersController {
   private readonly logger = new Logger(FreelancersController.name);
 

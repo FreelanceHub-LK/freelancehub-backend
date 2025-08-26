@@ -152,7 +152,7 @@ export class FreelancersService {
       ]);
 
       return {
-        data: freelancers,
+        data: JSON.parse(JSON.stringify(freelancers)), // Clean data to prevent circular references
         total,
         page,
         limit,
@@ -178,7 +178,8 @@ export class FreelancersService {
         throw new NotFoundException('Freelancer profile not found');
       }
 
-      return freelancer as any;
+      // Return a clean JSON object to prevent any circular reference issues
+      return JSON.parse(JSON.stringify(freelancer));
     } catch (error) {
       this.logger.error(`Error finding freelancer by user ID: ${error.message}`);
       throw error;
@@ -476,7 +477,8 @@ export class FreelancersService {
         throw new NotFoundException('Freelancer not found');
       }
 
-      return freelancer as any;
+      // Return a clean JSON object to prevent any circular reference issues
+      return JSON.parse(JSON.stringify(freelancer));
     } catch (error) {
       this.logger.error(`Error finding freelancer: ${error.message}`);
       throw error;
