@@ -127,6 +127,42 @@ export class MessagesController {
     return { count };
   }
 
+  // Conversation endpoints - These must come before parameterized routes
+  @Post('conversations')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a new conversation' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Conversation created successfully',
+    type: Conversation
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - validation failed' 
+  })
+  async createConversation(
+    @Body() createConversationDto: CreateConversationDto,
+  ): Promise<Conversation> {
+    return this.messagesService.createConversation(createConversationDto);
+  }
+
+  @Get('conversations')
+  @ApiOperation({ summary: 'Get conversations for current user' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Conversations retrieved successfully',
+    type: [Conversation]
+  })
+  @ApiQuery({ name: 'page', required: false, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Items per page' })
+  async findConversations(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 20,
+    @Request() req: any,
+  ) {
+    return this.messagesService.findConversations(req.user.id, page, limit);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a specific message by ID' })
   @ApiResponse({ 
@@ -218,41 +254,5 @@ export class MessagesController {
     @Request() req: any,
   ): Promise<void> {
     return this.messagesService.markAsRead(id, req.user.id);
-  }
-
-  // Conversation endpoints
-  @Post('conversations')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create a new conversation' })
-  @ApiResponse({ 
-    status: 201, 
-    description: 'Conversation created successfully',
-    type: Conversation
-  })
-  @ApiResponse({ 
-    status: 400, 
-    description: 'Bad request - validation failed' 
-  })
-  async createConversation(
-    @Body() createConversationDto: CreateConversationDto,
-  ): Promise<Conversation> {
-    return this.messagesService.createConversation(createConversationDto);
-  }
-
-  @Get('conversations')
-  @ApiOperation({ summary: 'Get conversations for current user' })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Conversations retrieved successfully',
-    type: [Conversation]
-  })
-  @ApiQuery({ name: 'page', required: false, description: 'Page number' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Items per page' })
-  async findConversations(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 20,
-    @Request() req: any,
-  ) {
-    return this.messagesService.findConversations(req.user.id, page, limit);
   }
 }
